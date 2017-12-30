@@ -19,14 +19,6 @@ import torch.utils.data as data
 from torchvision import transforms
 import os
 import os.path
-from scipy.ndimage import imread
-import glob
-import sys
-import re
-import random
-import math
-from PIL import Image
-import numbers
 
 import re
 import sys
@@ -153,7 +145,7 @@ def indexer_KITTI(root, train=True):
     return images
 
 
-class KITTI(data.Dataset):
+class KITTI(Dataset):
     def __init__(self, root, indexer, transform=None, depth_transform=None):
         images = indexer(root)
         if len(images) == 0:
@@ -183,37 +175,3 @@ class KITTI(data.Dataset):
 
     def __len__(self):
         return len(self.imgs)
-
-
-def create_KITTI_filelist(img_path):
-    abs_path = abspath('.')
-    path_img = os.path.join(abs_path, img_path)
-    filelist = os.listdir(path_img)
-    for fichier in filelist[:]:  # filelist[:] makes a copy of filelist.
-        if not (fichier.endswith(".png") or not (fichier.endswith(".jpg"))):
-            filelist.remove(fichier)
-
-    return filelist
-
-
-class KITTI_Images(Dataset):
-    """
-    Dataset for noised images and GT.
-    """
-
-    def __init__(self, img_path, transform=None):
-        self.filelist = create_KITTI_filelist(img_path)
-        self.transform = transform
-
-    def __getitem__(self, index):
-        print("File : ", self.filelist[index])
-        img = Image.open(self.filelist[index])
-        if self.transform is not None:
-            img = self.transform(img)
-
-        # Convert image and label to torch tensors
-        img = torch.from_numpy(np.asarray(img))
-        return img
-
-    def __len__(self):
-        return len(self.filelist)
