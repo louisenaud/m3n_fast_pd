@@ -22,7 +22,11 @@ class Pairwise(nn.Module):
         self.distance.paramterers_constraint()
 
     def gradient_operator(self, x):
+        """
 
+        :param x:
+        :return:
+        """
         B, H, W = x.size()[0:3]
 
         g_v = torch.zeros_like(x)
@@ -34,7 +38,12 @@ class Pairwise(nn.Module):
         return torch.stack([g_v, g_h], dim=3)
 
     def forward(self, img0, x):
+        """
 
+        :param img0:
+        :param x:
+        :return:
+        """
         w = self.weights.forward(img0)
         gx = self.gradient_operator(x)
         d = self.distance(gx)

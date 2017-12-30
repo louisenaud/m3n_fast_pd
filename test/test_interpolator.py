@@ -1,4 +1,3 @@
-
 import unittest
 from src.interpolator import Interpolator
 import torch
@@ -6,9 +5,7 @@ from torch.autograd import Variable
 
 
 class TestInterpolator(unittest.TestCase):
-
     def setUp(self):
-
         B, C, H, W = (2, 3, 10, 20)
 
         self.inputs_shape = (B, C, H, W)
@@ -30,12 +27,10 @@ class TestInterpolator(unittest.TestCase):
         return img, x
 
     def test_constructor(self):
-
         module = Interpolator()
         self.assertTrue(isinstance(module, Interpolator))
 
     def test_make_grid(self):
-
         B, C, H, W = self.inputs_shape
 
         module = Interpolator()
@@ -46,7 +41,6 @@ class TestInterpolator(unittest.TestCase):
         self.assertEqual(grid[0, 0, 1, 1], 1)
 
     def test_make_pytorch_grid(self):
-
         B, C, H, W = self.inputs_shape
 
         module = Interpolator()
@@ -68,20 +62,14 @@ class TestInterpolator(unittest.TestCase):
         interp_grid = module.interp_grid(x)
         interp_grid = interp_grid.data.numpy()
 
-        self.assertAlmostEqual(interp_grid[0, 0, 0, 0], -1. + 2./float(H-1))
-        self.assertAlmostEqual(interp_grid[0, 0, 0, 1], -1. + 2./float(W-1))
+        self.assertAlmostEqual(interp_grid[0, 0, 0, 0], -1. + 2. / float(H - 1))
+        self.assertAlmostEqual(interp_grid[0, 0, 0, 1], -1. + 2. / float(W - 1))
 
     def test_forward(self):
-
         img, x = self.create_inputs()
         module = Interpolator()
         img_interp = module.forward(img, x)
 
 
-
-
-
 if __name__ == '__main__':
     unittest.main()
-
-

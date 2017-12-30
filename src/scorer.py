@@ -12,7 +12,8 @@ from interpolator import Interpolator
 
 
 class Scorer(nn.Module):
-    """ Return score for two img_patch
+    """
+    Return score for two img_patch of dimensions:
         img_patch: B x C x H x W x Hp x Wp
         score: B x H x W
     """
@@ -28,11 +29,19 @@ class Scorer(nn.Module):
         self.alpha = nn.Parameter(self.alpha.unsqueeze(0).unsqueeze(2).unsqueeze(3))
 
     def paramterers_constraint(self):
-        """ Apply box constraint on parameters"""
+        """
+        Apply box constraint on parameters
+        """
 
         self.alpha.data.clamp(0., 1000.)
 
     def forward(self, img0_patch, img1_patch):
+        """
+        Computes the score for 2 image patches.
+        :param img0_patch, B x C x H x W x Hp x Wp
+        :param img1_patch, B x C x H x W x Hp x Wp
+        :return: score, B x H x W
+        """
 
         score = torch.abs(img0_patch-img1_patch)
         score = torch.mean(torch.mean(score, dim=5), dim=4)

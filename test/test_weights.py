@@ -1,4 +1,3 @@
-
 import unittest
 from src.weights import Weights
 import torch
@@ -6,9 +5,7 @@ from torch.autograd import Variable
 
 
 class TestWeights(unittest.TestCase):
-
     def setUp(self):
-
         B, C, H, W = (2, 3, 10, 20)
 
         self.inputs_shape = (B, C, H, W)
@@ -16,7 +13,6 @@ class TestWeights(unittest.TestCase):
 
     @staticmethod
     def parameters():
-
         parameters = {'lambda_cst': 1.,
                       'lambda_apt': 10.,
                       'inv_sigma': 0.1,
@@ -34,16 +30,13 @@ class TestWeights(unittest.TestCase):
         return Variable(torch.FloatTensor(B, H, W, C).zero_())
 
     def test_constructor(self):
-
         weights = Weights()
         self.assertTrue(isinstance(weights, Weights))
 
         weights = Weights(self.parameters())
         self.assertTrue(isinstance(weights, Weights))
 
-
     def test_forward(self):
-
         img = self.create_inputs()
         weights = Weights(num_input_channel=img.size()[1])
         w = weights.forward(img)
@@ -51,7 +44,6 @@ class TestWeights(unittest.TestCase):
         self.assertEqual(w.size(), self.outputs_shape)
 
     def test_train(self):
-
         # Inputs and target
         img = self.create_inputs()
         target = self.create_outputs()
@@ -78,8 +70,5 @@ class TestWeights(unittest.TestCase):
             weights.paramterers_constraint()
 
 
-
 if __name__ == '__main__':
     unittest.main()
-
-

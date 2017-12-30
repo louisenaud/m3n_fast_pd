@@ -1,4 +1,3 @@
-
 # Pytorch module
 # Input: img_0, img_1 BxCxHxW and x BxHxW
 # Ouput: cost BxHxW
@@ -29,12 +28,20 @@ class Unary(nn.Module):
         self.patch_extractor = PatchExtractor(self.patch_shape)
 
     def paramterers_constraint(self):
-        """ Apply constraint on parameters"""
+        """
+        Apply constraint on parameters
+        """
 
         self.score.paramterers_constraint()
 
     def forward(self, img0, img1, x):
-
+        """
+        Computes unary terms for grid.
+        :param img0:
+        :param img1:
+        :param x:
+        :return:
+        """
         # Create patches from img0 and img1
         img0_patch = self.patch_extractor.forward(img0)
         img1_patch = self.patch_extractor.forward(img1, x)

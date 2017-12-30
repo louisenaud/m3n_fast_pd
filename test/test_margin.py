@@ -9,7 +9,7 @@ class TestMargin(unittest.TestCase):
         B, H, W = (2, 10, 20)
 
         self.inputs_shape = (B, H, W)
-        self.outputs_shape = (B)
+        self.outputs_shape = B
 
     def create_inputs(self):
         B, H, W = self.inputs_shape
@@ -34,7 +34,6 @@ class TestMargin(unittest.TestCase):
 
         self.assertEqual(margin_cost.size()[0], self.outputs_shape)
 
+
 if __name__ == '__main__':
     unittest.main()
-
-

@@ -12,8 +12,8 @@ from interpolator import Interpolator
 
 
 class PatchExtractor(nn.Module):
-    """ Return patches centered around x for all image pixels
-
+    """
+    Return patches centered around x for all image pixels
     """
 
     def __init__(self, patch_shape=(3, 3)):
@@ -24,7 +24,12 @@ class PatchExtractor(nn.Module):
         self.pj = patch_shape[1] - int((patch_shape[1] - 1) / 2)
 
     def forward(self, img, x=None):
-
+        """
+        Extract patches of size patch_shape.
+        :param img:
+        :param x:
+        :return:
+        """
         # Get size
         B, C, H, W = img.size()
         Hp, Wp = self.patch_shape

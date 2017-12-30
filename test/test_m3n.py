@@ -1,4 +1,3 @@
-
 import unittest
 from src.m3n import M3N
 from src.margin import Margin
@@ -13,13 +12,11 @@ from torch.autograd import Variable
 
 
 class TestM3N(unittest.TestCase):
-
     def setUp(self):
-
         B, C, H, W = (2, 3, 512, 512)
 
         self.inputs_shape = (B, C, H, W)
-        self.outputs_shape = (B)
+        self.outputs_shape = B
 
         self.margin = Margin()
 
@@ -46,12 +43,10 @@ class TestM3N(unittest.TestCase):
         return Variable(torch.FloatTensor(B).zero_())
 
     def test_constructor(self):
-
         module = M3N(self.energy, self.margin)
         self.assertTrue(isinstance(module, M3N))
 
     def test_forward(self):
-
         img0, img1, x_gt, x_min = self.create_inputs()
 
         module = M3N(self.energy, self.margin)
@@ -59,9 +54,7 @@ class TestM3N(unittest.TestCase):
 
         self.assertEqual(nrg.size()[0], self.outputs_shape)
 
-
     def test_train(self):
-
         # Inputs and target
         img0, img1, x_gt, x_min = self.create_inputs()
         target = self.create_outputs()
@@ -87,7 +80,6 @@ class TestM3N(unittest.TestCase):
             # Constraints
             module.paramterers_constraint()
 
+
 if __name__ == '__main__':
     unittest.main()
-
-

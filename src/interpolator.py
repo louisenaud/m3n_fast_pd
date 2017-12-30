@@ -10,7 +10,8 @@ from torch.autograd import Variable
 
 
 class Interpolator(nn.Module):
-    """ Return img_interp where:
+    """
+    Return img_interp where:
         img_interp(i, j) = img(i+x(i,j,0), j+x(i,j,1))
     """
 
@@ -19,7 +20,8 @@ class Interpolator(nn.Module):
 
     @staticmethod
     def make_grid(H, W):
-        """ Return a grid of dimension 1 x H x W x 2
+        """
+        Return a grid of dimension 1 x H x W x 2
             grid lives in [0, H-1] x [0, W-1]
             grid[0, 10, 5, 0] = 10
             grid[0, 10, 5, 1] = 5
@@ -36,9 +38,14 @@ class Interpolator(nn.Module):
         return Variable(torch.stack([grid_h, grid_w], dim=3))
 
     def make_pytorch_grid(self, H, W):
-        """ Return a grid of dimension 1 x H x W x 2
-            grid lives in [-1., 1.] x [-1., 1.]
-            grid[0, 0, 0, 0] = -1.
+        """
+        Create Grid in Pytorch.
+
+        :param H: int
+        :param W: int
+        :return: grid of dimension 1 x H x W x 2
+        grid lives in [-1., 1.] x [-1., 1.]
+        grid[0, 0, 0, 0] = -1.
             grid[0, 0, W-1, 1] = 1.
         """
 
@@ -50,7 +57,11 @@ class Interpolator(nn.Module):
         return grid
 
     def interp_grid(self, x):
-
+        """
+        Interpolate the grid.
+        :param x:
+        :return:
+        """
         B, H, W = x.size()[0:3]
 
         pytorch_grid = self.make_pytorch_grid(H, W)
@@ -63,7 +74,12 @@ class Interpolator(nn.Module):
         return new_grid
 
     def forward(self, img, x):
+        """
 
+        :param img:
+        :param x:
+        :return:
+        """
         interp_grid = self.interp_grid(x)
 
         return nn.functional.grid_sample(img, interp_grid, mode='nearest', padding_mode='border')

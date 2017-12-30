@@ -39,7 +39,6 @@ class TestPatchExtractor(unittest.TestCase):
         module = PatchExtractor(self.patch_shape)
         self.assertTrue(isinstance(module, PatchExtractor))
 
-
     def test_forward(self):
 
         img, x = self.create_inputs()
@@ -50,6 +49,7 @@ class TestPatchExtractor(unittest.TestCase):
 
         img_patch = module.forward(img)
         self.assertEqual(img_patch.size(), self.outputs_shape)
+
 
 if __name__ == '__main__':
     unittest.main()

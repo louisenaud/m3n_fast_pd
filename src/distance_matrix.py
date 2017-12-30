@@ -13,7 +13,8 @@ from torch.autograd import Variable
 
 
 class Distance(nn.Module):
-    """Compute the distance matrix for a given # of labels:
+    """
+    Compute the distance matrix for a given # of labels:
         d(a, b) = \alpha \min( |a-b|, \beta)
     """
 
@@ -29,29 +30,33 @@ class Distance(nn.Module):
             self.beta = nn.Parameter(torch.FloatTensor([parameters['beta']]))
 
     def paramterers_constraint(self):
-        """ Apply box constraint on parameters"""
+        """
+        Apply box constraint on parameters
+        """
 
         self.alpha.data.clamp(0., 1000.)
         self.beta.data.clamp(1., 1000.)
 
     def phi(self, x):
-        """ Computes \alpha \min( |x|, \beta)"""
-
+        """
+        Computes \alpha \min( |x|, \beta)
+        """
         return self.alpha * torch.min(torch.abs(x), self.beta)
 
     def forward(self, x):
-
         return self.phi(x)
 
     def create_distance_matrix(self, L):
-        """ Compute the weights from image"""
-
+        """
+        Compute the weights from image
+        """
         indices = Variable(torch.arange(start=0, end=L, step=1))
         dist = Variable(torch.FloatTensor(1, L, L)).zero_()
         for l in range(L):
             dist[0, :, l] = self.phi(indices - float(l))
 
         return dist
+
 
 if __name__ == '__main__':
 

@@ -1,4 +1,3 @@
-
 import unittest
 from src.scorer import Scorer
 import torch
@@ -6,9 +5,7 @@ from torch.autograd import Variable
 
 
 class TestScorer(unittest.TestCase):
-
     def setUp(self):
-
         B, C, H, W, Hp, Wp = (2, 3, 10, 20, 3, 5)
 
         self.inputs_shape = (B, C, H, W, Hp, Wp)
@@ -16,7 +13,6 @@ class TestScorer(unittest.TestCase):
 
     @staticmethod
     def parameters():
-
         parameters = {'alpha': [1.2, 3]
                       }
 
@@ -34,16 +30,13 @@ class TestScorer(unittest.TestCase):
         return Variable(torch.FloatTensor(B, H, W).zero_())
 
     def test_constructor(self):
-
         module = Scorer(num_input_channel=self.inputs_shape[1])
         self.assertTrue(isinstance(module, Scorer))
 
         module = Scorer(self.parameters())
         self.assertTrue(isinstance(module, Scorer))
 
-
     def test_forward(self):
-
         img0_patch, img1_patch = self.create_inputs()
         module = Scorer(num_input_channel=img0_patch.size()[1])
         score = module.forward(img0_patch, img1_patch)
@@ -55,7 +48,6 @@ class TestScorer(unittest.TestCase):
         self.assertEqual(W_s, self.outputs_shape[2])
 
     def test_train(self):
-
         # Inputs and target
         img0_patch, img1_patch = self.create_inputs()
         target = self.create_outputs()
@@ -82,8 +74,5 @@ class TestScorer(unittest.TestCase):
             module.paramterers_constraint()
 
 
-
 if __name__ == '__main__':
     unittest.main()
-
-

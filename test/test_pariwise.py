@@ -69,6 +69,7 @@ class TestPairwise(unittest.TestCase):
             # Constraints
             module.paramterers_constraint()
 
+
 if __name__ == '__main__':
     unittest.main()
 

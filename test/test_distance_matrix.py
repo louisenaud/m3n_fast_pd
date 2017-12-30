@@ -1,4 +1,3 @@
-
 import unittest
 from src.distance_matrix import Distance
 import torch
@@ -6,9 +5,7 @@ from torch.autograd import Variable
 
 
 class TestDistance(unittest.TestCase):
-
     def setUp(self):
-
         B, H, W = (3, 10, 20)
         L = 10
 
@@ -19,7 +16,6 @@ class TestDistance(unittest.TestCase):
 
     @staticmethod
     def parameters():
-
         parameters = {'alpha': 1.,
                       'beta': 4.,
                       }
@@ -35,7 +31,6 @@ class TestDistance(unittest.TestCase):
         return Variable(torch.FloatTensor(B, H, W).zero_())
 
     def test_constructor(self):
-
         module = Distance()
         self.assertTrue(isinstance(module, Distance))
 
@@ -43,7 +38,6 @@ class TestDistance(unittest.TestCase):
         self.assertTrue(isinstance(module, Distance))
 
     def test_forward(self):
-
         x = self.create_inputs()
 
         module = Distance()
@@ -51,17 +45,13 @@ class TestDistance(unittest.TestCase):
 
         self.assertEqual(dx.size(), self.outputs_shape)
 
-
     def test_create_distance_matrix(self):
-
         module = Distance()
         matrix = module.create_distance_matrix(self.L)
 
         self.assertEqual(matrix.size(), self.matrix_shape)
 
-
     def test_train(self):
-
         # Inputs and target
         x = self.create_inputs()
         target = self.create_outputs()
@@ -88,8 +78,5 @@ class TestDistance(unittest.TestCase):
             module.paramterers_constraint()
 
 
-
 if __name__ == '__main__':
     unittest.main()
-
-

@@ -5,8 +5,8 @@
 
 import torch.nn as nn
 
-class M3N(nn.Module):
 
+class M3N(nn.Module):
     def __init__(self, energy, margin):
         super(M3N, self).__init__()
 
@@ -14,12 +14,13 @@ class M3N(nn.Module):
         self.margin = margin
 
     def paramterers_constraint(self):
-        """ Apply constraint on parameters"""
+        """
+        Apply constraint on parameters
+        """
 
         self.energy.paramterers_constraint()
 
     def forward(self, img0, img1, x_gt, x_min):
-
         # Get energy of x_gt and x_min
         nrg_gt = self.energy.forward(img0, img1, x_gt)
         nrg_min = self.energy.forward(img0, img1, x_min)

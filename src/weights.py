@@ -4,7 +4,8 @@ import torch.nn as nn
 
 
 class Weights(nn.Module):
-    """Compute the regularization weights from an image:
+    """
+    Compute the regularization weights from an image:
         w = \lambda_cst + \lambda_apt * exp(-inv_sigma * |conv_3x3(img)| ^ \alpha)
         img: BxCxHxW
         w = BxHxWx2
@@ -28,7 +29,9 @@ class Weights(nn.Module):
         self.conv_3x3 = nn.Conv2d(num_input_channel, 2, (3, 3), padding=1)
 
     def paramterers_constraint(self):
-        """ Apply box constraint on parameters"""
+        """
+        Apply box constraint on parameters
+        """
 
         self.lambda_cst.data.clamp(0., 1000.)
         self.lambda_apt.data.clamp(0., 1000.)
@@ -36,7 +39,11 @@ class Weights(nn.Module):
         self.alpha.data.clamp(0.1, 10.)
 
     def forward(self, img):
-        """ Compute the weights from image"""
+        """
+        Compute the weights from image.
+        :param img:
+        :return:
+        """
 
         img_map = torch.pow(self.conv_3x3.forward(img), self.alpha)
         img_map = img_map.permute(0, 2, 3, 1)

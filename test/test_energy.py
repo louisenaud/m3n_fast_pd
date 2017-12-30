@@ -1,4 +1,3 @@
-
 import unittest
 from src.energy import Energy
 from src.scorer import Scorer
@@ -11,13 +10,11 @@ from torch.autograd import Variable
 
 
 class TestEnergy(unittest.TestCase):
-
     def setUp(self):
-
         B, C, H, W = (2, 3, 10, 20)
 
         self.inputs_shape = (B, C, H, W)
-        self.outputs_shape = (B)
+        self.outputs_shape = B
 
         scorer = Scorer(num_input_channel=C)
         self.unary = Unary(scorer)
@@ -25,7 +22,6 @@ class TestEnergy(unittest.TestCase):
         weights = Weights(num_input_channel=C)
         distance = Distance()
         self.pairwise = Pairwise(weights, distance)
-
 
     def create_inputs(self):
         B, C, H, W = self.inputs_shape
@@ -40,12 +36,10 @@ class TestEnergy(unittest.TestCase):
         return Variable(torch.FloatTensor(B).zero_())
 
     def test_constructor(self):
-
         module = Energy(self.unary, self.pairwise)
         self.assertTrue(isinstance(module, Energy))
 
     def test_forward(self):
-
         img0, img1, x = self.create_inputs()
 
         module = Energy(self.unary, self.pairwise)
@@ -53,9 +47,7 @@ class TestEnergy(unittest.TestCase):
 
         self.assertEqual(nrg.size()[0], self.outputs_shape)
 
-
     def test_train(self):
-
         # Inputs and target
         img0, img1, x = self.create_inputs()
         target = self.create_outputs()
@@ -81,7 +73,6 @@ class TestEnergy(unittest.TestCase):
             # Constraints
             module.paramterers_constraint()
 
+
 if __name__ == '__main__':
     unittest.main()
-
-
