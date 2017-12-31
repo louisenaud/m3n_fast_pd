@@ -1,3 +1,8 @@
+"""
+Project:    m3n_fast_pd
+File:       scorer.py
+Created by: louise
+"""
 
 # Pytorch module
 # Input: img_0_patch and img_1_patch B x C x H x W x Ph xPw
@@ -18,11 +23,12 @@ class Scorer(nn.Module):
         score: B x H x W
     """
 
-    def __init__(self, parameters=None, num_input_channel=1):
+    def __init__(self, parameters=None, num_input_channel=
+    1):
         super(Scorer, self).__init__()
 
         if not parameters:
-            self.alpha = torch.FloatTensor(num_input_channel*[0.])
+            self.alpha = torch.FloatTensor(num_input_channel*[1.])
         else:
             self.alpha = torch.FloatTensor([parameters['alpha']])
 

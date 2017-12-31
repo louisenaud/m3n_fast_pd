@@ -1,3 +1,9 @@
+"""
+Project:    m3n_fast_pd
+File:       unaries.py
+Created by: louise
+"""
+
 # Pytorch module
 # Input: img_0, img_1 BxCxHxW and x BxHxW
 # Ouput: cost BxHxW

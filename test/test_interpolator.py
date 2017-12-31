@@ -37,8 +37,8 @@ class TestInterpolator(unittest.TestCase):
         grid = module.make_grid(H, W)
         grid = grid.data.numpy()
 
-        self.assertEqual(grid[0, 1, 0, 0], 1)
-        self.assertEqual(grid[0, 0, 1, 1], 1)
+        self.assertEqual(grid[0, 0, 1, 0], 1)
+        self.assertEqual(grid[0, 1, 0, 1], 1)
 
     def test_make_pytorch_grid(self):
         B, C, H, W = self.inputs_shape
@@ -50,8 +50,8 @@ class TestInterpolator(unittest.TestCase):
         self.assertAlmostEqual(grid[0, 0, 0, 0], -1.)
         self.assertAlmostEqual(grid[0, 0, 0, 1], -1.)
 
-        self.assertAlmostEqual(grid[0, -1, 0, 0], 1.)
-        self.assertAlmostEqual(grid[0, 0, -1, 1], 1.)
+        self.assertAlmostEqual(grid[0, 0, -1, 0], 1.)
+        self.assertAlmostEqual(grid[0, -1, 0, 1], 1.)
 
     def test_interp_grid(self):
         B, C, H, W = self.inputs_shape
@@ -62,8 +62,8 @@ class TestInterpolator(unittest.TestCase):
         interp_grid = module.interp_grid(x)
         interp_grid = interp_grid.data.numpy()
 
-        self.assertAlmostEqual(interp_grid[0, 0, 0, 0], -1. + 2. / float(H - 1))
-        self.assertAlmostEqual(interp_grid[0, 0, 0, 1], -1. + 2. / float(W - 1))
+        self.assertAlmostEqual(interp_grid[0, 0, 0, 1], -1. + 2. / float(H - 1))
+        self.assertAlmostEqual(interp_grid[0, 0, 0, 0], -1. + 2. / float(W - 1))
 
     def test_forward(self):
         img, x = self.create_inputs()

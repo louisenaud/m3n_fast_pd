@@ -1,4 +1,8 @@
-
+"""
+Project:    m3n_fast_pd
+File:       margin.py
+Created by: louise
+"""
 import torch
 import torch.nn as nn
 

@@ -22,7 +22,7 @@ class Distance(nn.Module):
         super(Distance, self).__init__()
 
         if not parameters:
-            self.alpha = nn.Parameter(torch.FloatTensor([0.]))
+            self.alpha = nn.Parameter(torch.FloatTensor([1.]))
             self.beta = nn.Parameter(torch.FloatTensor([4.]))
 
         else:

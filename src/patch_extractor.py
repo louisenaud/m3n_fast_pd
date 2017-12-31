@@ -46,11 +46,11 @@ class PatchExtractor(nn.Module):
                 # Create x_disp
                 flow = Variable(torch.FloatTensor(B, H, W, 2)).type_as(img)
                 if x is None:
-                    flow[:, :, :, 0] = float(i - self.pi)
-                    flow[:, :, :, 1] = float(i - self.pj)
+                    flow[:, :, :, 0] = float(j - self.pj)
+                    flow[:, :, :, 1] = float(i - self.pi)
                 else:
-                    flow[:, :, :, 0] = x + float(i - self.pi)
-                    flow[:, :, :, 1] = float(j - self.pj)
+                    flow[:, :, :, 0] = -x + float(j - self.pj)
+                    flow[:, :, :, 1] = float(i - self.pi)
 
                 # Apply
                 img_patch[:, :, :, :, i, j] = interpolator.forward(img, flow)

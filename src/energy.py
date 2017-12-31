@@ -1,3 +1,9 @@
+"""
+Project:    m3n_fast_pd
+File:       energy.py
+Created by: louise
+"""
+
 # Pytorch module
 # Input: img0 and img1: B x C x H x W and x BxHxW
 # Ouput: nrg B

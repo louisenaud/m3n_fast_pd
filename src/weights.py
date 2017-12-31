@@ -1,4 +1,8 @@
-
+"""
+Project:    m3n_fast_pd
+File:       weights.py
+Created by: louise
+"""
 import torch
 import torch.nn as nn
 
@@ -15,9 +19,9 @@ class Weights(nn.Module):
         super(Weights, self).__init__()
 
         if not parameters:
-            self.lambda_cst = nn.Parameter(torch.FloatTensor([0.]))
-            self.lambda_apt = nn.Parameter(torch.FloatTensor([0.]))
-            self.inv_sigma = nn.Parameter(torch.FloatTensor([1.]))
+            self.lambda_cst = nn.Parameter(torch.FloatTensor([0.01]))
+            self.lambda_apt = nn.Parameter(torch.FloatTensor([0.1]))
+            self.inv_sigma = nn.Parameter(torch.FloatTensor([20.]))
             self.alpha = nn.Parameter(torch.FloatTensor([2.]))
 
         else:
@@ -27,6 +31,12 @@ class Weights(nn.Module):
             self.alpha = nn.Parameter(torch.FloatTensor([parameters['alpha']]))
 
         self.conv_3x3 = nn.Conv2d(num_input_channel, 2, (3, 3), padding=1)
+        self.conv_3x3.weight.data[:,] = 0.
+        self.conv_3x3.weight.data[0, :, 1, 1] = -1.
+        self.conv_3x3.weight.data[0, :, 1, 2] = 1.
+        self.conv_3x3.weight.data[1, :, 1, 1] = -1.
+        self.conv_3x3.weight.data[1, :, 2, 1] = 1.
+
 
     def paramterers_constraint(self):
         """

@@ -35,7 +35,7 @@ class Interpolator(nn.Module):
         grid_w = torch.arange(start=0, end=W, step=1)
         grid_w = grid_w.unsqueeze(0).unsqueeze(1).expand(1, H, W)
 
-        return Variable(torch.stack([grid_h, grid_w], dim=3))
+        return Variable(torch.stack([grid_w, grid_h], dim=3))
 
     def make_pytorch_grid(self, H, W):
         """
@@ -50,8 +50,8 @@ class Interpolator(nn.Module):
         """
 
         grid = self.make_grid(H, W)
-        grid[:, :, :, 0] = grid[:, :, :, 0] / float(H-1)
-        grid[:, :, :, 1] = grid[:, :, :, 1] / float(W-1)
+        grid[:, :, :, 0] = grid[:, :, :, 0] / float(W-1)
+        grid[:, :, :, 1] = grid[:, :, :, 1] / float(H-1)
         grid = 2. * grid - 1.
 
         return grid
@@ -68,8 +68,8 @@ class Interpolator(nn.Module):
 
         new_grid = Variable(torch.FloatTensor(B, H, W, 2)).type_as(x)
         for b in range(B):
-            new_grid[b, :, :, 0] = pytorch_grid[:, :, :, 0] + 2. * x[b, :, :, 0] / float(H-1)
-            new_grid[b, :, :, 1] = pytorch_grid[:, :, :, 1] + 2. * x[b, :, :, 1] / float(W-1)
+            new_grid[b, :, :, 0] = pytorch_grid[:, :, :, 0] + 2. * x[b, :, :, 0] / float(W-1)
+            new_grid[b, :, :, 1] = pytorch_grid[:, :, :, 1] + 2. * x[b, :, :, 1] / float(H-1)
 
         return new_grid
 

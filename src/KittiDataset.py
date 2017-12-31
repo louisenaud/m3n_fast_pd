@@ -6,6 +6,7 @@ On:         29/12/17
 At:         6:05 PM
 """
 from __future__ import print_function
+import itertools
 import os
 from os.path import abspath
 
@@ -15,92 +16,17 @@ from PIL import Image
 from torch.utils.data.dataset import Dataset
 
 import torch
-import torch.utils.data as data
-from torchvision import transforms
 import os
 import os.path
 
-import re
-import sys
-from PIL import Image, ImageOps
+import imageio
+from PIL import Image
 
 
-IMG_EXTENSIONS = [
-    '.jpg', '.JPG', '.jpeg', '.JPEG',
-    '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP',
-]
-
-
-def write_pfm_image(file_name, img):
-    """
-    Write image in the PFM format.
-    :param file_name: str, file name for output file
-    :param img: Pytorch Variable, to write in output file
-    :return:
-    """
-
-    file_ = open(file_name, 'wb')
-
-    if img.dtype.name != 'float32':
-        raise Exception('Image dtype must be float32.')
-
-        img = np.flipud(img)
-
-    if len(img.shape) == 3 and img.shape[2] == 3:  # color image
-        color = True
-    elif len(img.shape) == 2 or len(img.shape) == 3 and img.shape[2] == 1:  # greyscale
-        color = False
-    else:
-        raise Exception('Image must have H x W x 3, H x W x 1 or H x W dimensions.')
-
-    file_.write('PF\n' if color else 'Pf\n')
-    file_.write('%d %d\n' % (img.shape[1], img.shape[0]))
-    image.tofile(file_)
-
-
-def read_pfm_image(img_path):
-    """
-    read a pfm img
-    :param img_path: str, path to pfm image.
-    :return: H x W x C numpy array
-    """
-    with open(img_path, 'rb') as file:
-        header = file.readline().rstrip().decode(encoding='utf-8')
-        if header == 'PF':
-            color = True
-        elif header == 'Pf':
-            color = False
-        else:
-            raise Exception('Not a PFM file.')
-
-        dim_match = re.match(r'^(\d+)\s(\d+)\s$', file.readline().decode(encoding='utf-8'))
-        if dim_match:
-            width, height = map(int, dim_match.groups())
-        else:
-            raise Exception('Malformed PFM header.')
-
-        scale = float(file.readline().rstrip().decode(encoding='utf-8'))
-        if scale < 0:  # little-endian
-            endian = '<'
-            scale = -scale
-        else:
-            endian = '>'  # big-endian
-
-        data = np.fromfile(file, endian + 'f')
-        shape = (height, width, 3) if color else (height, width, 1)
-
-        data = np.reshape(data, shape)
-        data = np.flipud(data)
-    return data
-
-
-def read_color_image(path):
-    """
-
-    :param path:
-    :return:
-    """
-    return Image.open(path).convert('RGB')
+def read_disparity(img_path):
+    im2 = imageio.imread(img_path)
+    im2 = im2.astype(float)
+    return torch.from_numpy(im2)
 
 
 def is_image_file(filename):
@@ -128,19 +54,22 @@ def indexer_KITTI(root, train=True):
     :param train:
     :return:
     """
-    status = 'TRAIN' if train else 'TEST'
-    stereo = os.path.join(root, 'frames_cleanpass', status)
-    disparity = os.path.join(root, 'disparity', status)
+    #status = 'training' if train else 'testing'
+    stereo_l = os.path.join(root, 'image_0')
+    print(stereo_l)
+    stereo_r = os.path.join(root, 'image_1')
+    disparity = os.path.join(root, 'disp_refl_noc')
     images = []
 
-    for type in ['A', 'B', 'C']:
-        for scene in sorted(os.listdir(os.path.join(stereo, type))):
-            for fname in sorted(os.listdir(os.path.join(stereo, type, scene, 'left'))):
-                if is_image_file(fname):
-                    left_path, right_path = os.path.join(stereo, type, scene, 'left', fname), os.path.join(stereo, type, scene,
-                                                                                                  'right', fname)
-                    disp_path = os.path.join(disparity, type, scene, 'left', fname[:-3]+'pfm')
-                    images.append((left_path, right_path, disp_path))
+    for l, r, d in itertools.izip(sorted(os.listdir(stereo_l)),
+                                  sorted(os.listdir(stereo_r)),
+                                  sorted(os.listdir(disparity))):
+
+        img_l = os.path.abspath(os.path.join(stereo_l, l))
+        img_r = os.path.abspath(os.path.join(stereo_r, r))
+        disp = os.path.abspath(os.path.join(disparity, d))
+
+        images.append((img_l, img_r, disp))
 
     return images
 
@@ -163,15 +92,18 @@ class KITTI(Dataset):
         # Get path of right, left and disparity images
         left_path, right_path, disp_path = self.imgs[index]
         # Read each image
-        left_img = read_color_image(left_path)
-        right_img = read_color_image(right_path)
-        disparity = read_pfm_image(disp_path)
+        left_img = Image.open(left_path).convert("L")
+        right_img = Image.open(right_path).convert("L")
+        disp = read_disparity(disp_path)
         # Apply transforms to the images
-        left_img = self.transform(left_img)
-        right_img = self.transform(right_img)
-        disparity = self.depth_transform(disparity)
+        if self.transform is not None:
+            left_img = self.transform(left_img)
+            right_img = self.transform(right_img)
+        if self.depth_transform is not None:
+            disp = self.depth_transform(disp)
+
         # Return 3-tuple
-        return left_img, right_img, disparity
+        return left_img, right_img, disp
 
     def __len__(self):
         return len(self.imgs)

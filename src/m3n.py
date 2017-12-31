@@ -1,3 +1,9 @@
+"""
+Project:    m3n_fast_pd
+File:       m3n.py
+Created by: louise
+"""
+
 # Pytorch module
 # Input: x_gt, x_min BxHxW and img_0, img_1 BxCxHxW
 # Ouput: loss B

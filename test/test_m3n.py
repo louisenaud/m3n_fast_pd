@@ -13,7 +13,7 @@ from torch.autograd import Variable
 
 class TestM3N(unittest.TestCase):
     def setUp(self):
-        B, C, H, W = (2, 3, 512, 512)
+        B, C, H, W = (2, 3, 20, 30)
 
         self.inputs_shape = (B, C, H, W)
         self.outputs_shape = B
