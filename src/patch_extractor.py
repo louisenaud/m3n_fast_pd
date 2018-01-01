@@ -37,7 +37,7 @@ class PatchExtractor(nn.Module):
         # Create interpolator
         interpolator = Interpolator()
 
-        #
+        # Create patches
         img_patch = Variable(torch.FloatTensor(B, C, H, W, Hp, Wp)).type_as(img)
 
         for i in range(Hp):

@@ -14,8 +14,8 @@
 
 using namespace std;
 
-typedef int               mrf_data;
-typedef int               mrf_label;
+typedef float             mrf_data;
+typedef float             mrf_label;
 typedef int               mrf_ind;
 typedef double            mrf_nrg;
 
@@ -34,12 +34,11 @@ class BC_PD_CF{
   
   
 public:
-  BC_PD_CF(int R, int C, int L, mrf_data *unaries, mrf_data *weights,
-           mrf_data *dist, mrf_data *x_init);
-  
+  BC_PD_CF(int R, int C, int L, vector<float> unaries_, vector<float> weights_, vector<float> dist_, vector<float> x_init_);
+
   ~BC_PD_CF();
   
-  void optimize(const size_t I_max, const bool grow_sink);
+  void optimize(const size_t I_max, bool grow_sink);
   void restore_unaries();
   
   mrf_nrg get_primal_nrg(){return nrg;};
@@ -56,7 +55,7 @@ private:
   // Pointers to mrf data
   mrf_ind    *edges;
   mrf_data   *weights;
-  mrf_data   *dist;
+  mrf_v_data   dist;
   
   mrf_v_data   unaries_;
   mrf_v_data   h_;

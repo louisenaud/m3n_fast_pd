@@ -1,3 +1,8 @@
+"""
+Project:    m3n_fast_pd
+File:       mrf.py
+Created by: louise
+"""
 # Pytorch module
 # Input: x_gt, x_min BxHxW and img_0, img_1 BxCxHxW
 # Ouput: loss B
@@ -45,12 +50,12 @@ class MRF(nn.Module):
         B, C, H, W = img0.size()
 
         L = x_max - x_min + 1
-        unary_cost = torch.zeros(B, H, W, L)
+        unary_cost = torch.zeros(B, H, W, int(L))
 
         # Precompute img0_patch
         img0_patch = self.unary.patch_extractor.forward(img0)
 
-        for l in range(L):
+        for l in range(int(L)):
             x_disp = x_min + l
             cost = self.get_unary_cost(img0_patch, img1, x_disp)
             unary_cost[:, :, :, l] = cost.data

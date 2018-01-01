@@ -51,8 +51,8 @@ class Distance(nn.Module):
         Compute the weights from image
         """
         indices = Variable(torch.arange(start=0, end=L, step=1))
-        dist = Variable(torch.FloatTensor(1, L, L)).zero_()
-        for l in range(L):
+        dist = Variable(torch.FloatTensor(1, int(L), int(L))).zero_()
+        for l in range(int(L)):
             dist[0, :, l] = self.phi(indices - float(l))
 
         return dist

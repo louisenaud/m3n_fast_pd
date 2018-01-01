@@ -8,7 +8,7 @@
 #include <new>
 
 #ifdef __GNUC__
-  #include <cstdint>
+  #include <stdint.h>
 #endif
 
 template
@@ -425,7 +425,7 @@ int GridGraph_2D_4C<type_tcap,type_ncap,type_flow>::find_origin(int v,const int 
 {
   const int start_v = v;
 
-  while(true)
+  while(1)
   {
     if (TIMESTAMP(v)==TIME)    { goto L1; }
     if (PARENT(v) == NONE)     { return NONE; }
@@ -560,7 +560,7 @@ void GridGraph_2D_4C<type_tcap,type_ncap,type_flow>::compute_maxflow(const bool 
 
   QF = QN[0];
 
-  while(true)
+  while(1)
   {
     int vs;
     int vt;
@@ -580,7 +580,7 @@ void GridGraph_2D_4C<type_tcap,type_ncap,type_flow>::compute_maxflow(const bool 
 template <typename type_tcap,typename type_ncap,typename type_flow>
 inline int GridGraph_2D_4C<type_tcap,type_ncap,type_flow>::node_id(int x,int y) const
 {
-  return nodeId(static_cast<unsigned int>(x+1), static_cast<unsigned int>(y+1));
+  return nodeId(x+1,y+1);
 }
 
 template <typename type_tcap,typename type_ncap,typename type_flow>
@@ -672,7 +672,7 @@ inline void GridGraph_2D_4C<type_tcap,type_ncap,type_flow>::set_caps(const type_
   for(int xy=0,y=0;y<oh;y++){
     for(int x=0;x<ow;x++,xy++)
     {
-      const int v = nodeId(static_cast<unsigned int>(x+1), static_cast<unsigned int>(y+1));
+      const int v = nodeId(x+1,y+1);
       
       if (cap_s[xy] > 0 && cap_t[xy] > 0)
       {
@@ -797,7 +797,7 @@ GridGraph_2D_4C<type_tcap,type_ncap,type_flow>::GridGraph_2D_4C(int w,int h) :
   H(next_higher_mul8(h+2)),
   WB(W/8),
   YOFS((WB-1)*64+8),
-  mem_pool(nullptr)
+  mem_pool(NULL)
 {
   size_t mem_pool_size = (W*H*sizeof(unsigned char)+64+         // label
                           W*H*sizeof(unsigned char)+64+         // parent
@@ -830,8 +830,9 @@ GridGraph_2D_4C<type_tcap,type_ncap,type_flow>::GridGraph_2D_4C(int w,int h) :
 
   parent_id = (int*)align(pool_malloc(W*H*sizeof(int)+64),64);
 
-  for (auto &i : rc) {
-    i = (type_ncap*)align(pool_malloc(W*H*sizeof(type_ncap)+64),64);
+  for(int i=0;i<4;i++)
+  {
+    rc[i] = (type_ncap*)align(pool_malloc(W*H*sizeof(type_ncap)+64),64);
   }
 
   rc_st = (type_tcap*)align(pool_malloc(W*H*sizeof(type_tcap)+64),64);
@@ -843,7 +844,7 @@ GridGraph_2D_4C<type_tcap,type_ncap,type_flow>::GridGraph_2D_4C(int w,int h) :
 
   timestamp = (int*)align(pool_malloc(W*H*sizeof(int)+64),64);
 
-  memset(parent, NONE, static_cast<size_t>(W*H));
+  memset(parent,NONE,W*H);
 
   QN = (int*)align(pool_malloc(W*H*sizeof(int)+64),64);
   QF = 0;
@@ -936,7 +937,7 @@ GridGraph_2D_4C<type_tcap,type_ncap,type_flow>::reset()
   
   
   memset(mem_pool, 0, mem_pool_size);
-  memset(parent, NONE, static_cast<size_t>(W*H));
+  memset(parent,NONE,W*H);
   
   QF = 0;
   QB = 0;

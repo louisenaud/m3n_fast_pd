@@ -19,6 +19,7 @@ from src.scorer import Scorer
 from src.energy import Energy
 from src.margin import Margin
 from src.m3n import M3N
+from src.mrf import MRF
 from src.unaries import Unary
 from src.pairwise import Pairwise
 from src.weights import Weights
@@ -62,14 +63,17 @@ batch_size = 300
 dataset_size = 12
 
 # Transform dataset
-transformations = transforms.Compose([transforms.ToTensor()])
-dd = KITTI("/Users/louisenaud1/Documents/data_disparity/KITTI/", indexer=indexer_KITTI, transform=transformations, depth_transform=None)
+
+transformations = transforms.Compose([transforms.CenterCrop((16, 16)), transforms.ToTensor()])
+transformations_d = transforms.Compose([transforms.CenterCrop((16, 16))])
+dd = KITTI("/Users/louisenaud1/Documents/data_disparity/KITTI/", indexer=indexer_KITTI, transform=transformations,
+           depth_transform=transformations_d)
 if args.use_cuda:
     dtype = torch.cuda.FloatTensor
 else:
     dtype = torch.FloatTensor
 
-train_loader = DataLoader(dd, batch_size=10, num_workers=4)
+train_loader = DataLoader(dd, batch_size=1, num_workers=4)
 scorer = Scorer()
 weights = Weights()
 distance = Distance()
@@ -77,12 +81,13 @@ unaries = Unary(scorer)
 pairwise = Pairwise(weights, distance)
 energy = Energy(unaries, pairwise)
 margin = Margin()
+mrf = MRF(unaries, pairwise)
 net = M3N(energy, margin)
 
 # loss criterion for data
-criterion = torch.nn.MSELoss(size_average=True)
+criterion = torch.nn.MSELoss(size_average=False)
 # loss criterion for data smoothness
-criterion_g = torch.nn.MSELoss(size_average=True)
+criterion_g = torch.nn.MSELoss(size_average=False)
 # Adam Optimizer with initial learning rate of 1e-3
 optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
 # Scheduler to decrease the leaning rate at each epoch
@@ -97,21 +102,28 @@ it = 0
 t0 = time.time()
 net.train()
 
+x_min = torch.zeros([1])
+x_max = 5000. * torch.ones([1])
 for epoch in range(max_epochs):
-    for batch_idx, (img_l, img_r, target) in enumerate(train_loader.dataset):
-        # data, target = data.cuda(async=True), target.cuda(async=True) # On GPU
-        x_opt =
-        img_l, img_r = Variable(img_l), Variable(img_r)
-        target = Variable(target)
+    for batch_id, (batch0, batch1, batchd) in enumerate(train_loader):
+            # data, target = data.cuda(async=True), target.cuda(async=True) # On GPU
+        batch0, batch1, batchd = Variable(batch0), Variable(batch1), Variable(batchd)
+        x_opt = mrf.forward(batch0, batch1, 0., 4000.)
+        # reset optimizer
         optimizer.zero_grad()
-        output = net.forward(img_l, img_r, target, x_min)
-        loss = criterion(output, target)
+        # compute estimate for disparity
+        batchd.squeeze_(1)
+        output = net.forward(batch0, batch1, batchd, x_opt)
+        # compute loss
+        loss = criterion(output, batchd)
+        # backpropagation
         loss.backward()
+        # optimizer step
         optimizer.step()
-        if batch_idx % 10 == 0:
+        if batch_id % 10 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx, len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.data[0]))
+                epoch, batch_id, len(train_loader.dataset),
+                100. * batch_id / len(train_loader), loss.data[0]))
     scheduler.step()
 
 

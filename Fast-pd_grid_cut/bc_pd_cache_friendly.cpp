@@ -9,8 +9,8 @@
 #include "bc_pd_cache_friendly.hpp"
 
 //-----------------------------------------------------------------------------//
-BC_PD_CF::BC_PD_CF(int R_, int C_, int L_, mrf_data *unaries_,
-                   mrf_data *weights_, mrf_data *dist_, mrf_data *x_init_)
+BC_PD_CF::BC_PD_CF(int R_, int C_, int L_, vector<float> unaries_, vector<float> weights_, vector<float> dist_, vector<float> x_init_)
+
 {
   // Sizes of MRF
   R = R_;
@@ -18,8 +18,7 @@ BC_PD_CF::BC_PD_CF(int R_, int C_, int L_, mrf_data *unaries_,
   L = L_;
   
   N = R*C;
- 
-  
+
   // Extended sizes for cache friendlyness
   RE =next_higher_mul8(R+2);
   CE =next_higher_mul8(C+2);
@@ -28,11 +27,13 @@ BC_PD_CF::BC_PD_CF(int R_, int C_, int L_, mrf_data *unaries_,
   YOFS = (RB-1)*64+8;
   
   
-  //printf("MRF with %u nodes (%u, %u), %u labels\n",N, R, C, L);
+  printf("MRF with %u nodes (%u, %u), %u labels\n",N, R, C, L);
   
   // Pointers to mrf data
-  weights = weights_;
-  dist    = dist_;
+  weights = &weights_[0];
+  dist.resize(L*L, 0);
+  for(mrf_ind a=0; a<L*L; ++a)
+    dist[a] = dist_[a];
   
   // Create primal and dual variables
   x_.resize(NE, 0);
@@ -155,17 +156,17 @@ void BC_PD_CF::init_dual_variables()
 }
 
 //----------------------------------------------------------------------------//
-void BC_PD_CF::optimize(const size_t I_max, const bool grow_sink)
+void BC_PD_CF::optimize(const size_t I_max, bool grow_sink)
 {
   
   //all_sanity_check();
   
   nrg = compute_primal_nrg();
-  //printf("Init: %f\n", nrg);
+  printf("Init: %f\n", nrg);
   
   for(size_t i=0; i<I_max; ++i)
   {
-    //printf("  Iter %zu: ",i);
+    printf("  Iter %zu: ",i);
     clock_t t_outer = clock();
     
     for(mrf_label l=0; l<L; ++l)
@@ -175,7 +176,7 @@ void BC_PD_CF::optimize(const size_t I_max, const bool grow_sink)
     }
     
     mrf_nrg nrg_new = compute_primal_nrg();
-    //printf("%.2f sec, APF = %f \n", get_timing(t_outer),nrg_new);
+    printf("%.2f sec, APF = %f \n", get_timing(t_outer),nrg_new);
     
     if(nrg_new < nrg)
       nrg = nrg_new;

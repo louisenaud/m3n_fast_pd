@@ -8,43 +8,26 @@ At:         6:05 PM
 from __future__ import print_function
 import itertools
 import os
-from os.path import abspath
-
-import numpy as np
-from PIL import Image
-
-from torch.utils.data.dataset import Dataset
-
-import torch
-import os
 import os.path
 
+from torch.utils.data.dataset import Dataset
+from torchvision import transforms
+import torch
+import numpy
+
 import imageio
+import png
+
 from PIL import Image
 
 
 def read_disparity(img_path):
     im2 = imageio.imread(img_path)
-    im2 = im2.astype(float)
-    return torch.from_numpy(im2)
-
-
-def is_image_file(filename):
-    """
-
-    :param filename:
-    :return:
-    """
-    return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
-
-
-def is_pfm_file(filename):
-    """
-
-    :param filename: str
-    :return: bool
-    """
-    return filename.endswith('.pfm')
+    r = png.Reader(filename=img_path)
+    row_count, column_count, pngdata, meta = r.asDirect()
+    image_2d = numpy.vstack(itertools.imap(numpy.uint16, pngdata))
+    im2 = image_2d.astype(float)
+    return Image.fromarray(im2).convert("L")
 
 
 def indexer_KITTI(root, train=True):
@@ -54,9 +37,8 @@ def indexer_KITTI(root, train=True):
     :param train:
     :return:
     """
-    #status = 'training' if train else 'testing'
+    #TODO(louise): add training / testing configuration
     stereo_l = os.path.join(root, 'image_0')
-    print(stereo_l)
     stereo_r = os.path.join(root, 'image_1')
     disparity = os.path.join(root, 'disp_refl_noc')
     images = []
@@ -78,7 +60,7 @@ class KITTI(Dataset):
     def __init__(self, root, indexer, transform=None, depth_transform=None):
         images = indexer(root)
         if len(images) == 0:
-            raise (RuntimeError("Found 0 images in folders."))
+            raise (RuntimeError("No images in data set."))
         self.imgs = images
         self.transform = transform
         self.depth_transform = depth_transform
@@ -101,6 +83,7 @@ class KITTI(Dataset):
             right_img = self.transform(right_img)
         if self.depth_transform is not None:
             disp = self.depth_transform(disp)
+        disp = transforms.ToTensor()(disp)
 
         # Return 3-tuple
         return left_img, right_img, disp
