@@ -1,3 +1,8 @@
+"""
+Project:    m3n_fast_pd
+File:       patch_extractor.py
+Created by: louise
+"""
 
 # Pytorch module
 # Input: img: B x C x H x W and x BxHxW
@@ -38,7 +43,7 @@ class PatchExtractor(nn.Module):
         interpolator = Interpolator()
 
         # Create patches
-        img_patch = Variable(torch.FloatTensor(B, C, H, W, Hp, Wp)).type_as(img)
+        img_patch = Variable(torch.DoubleTensor(B, C, H, W, Hp, Wp)).type_as(img)
 
         for i in range(Hp):
             for j in range(Wp):

@@ -64,9 +64,9 @@ class Interpolator(nn.Module):
         """
         B, H, W = x.size()[0:3]
 
-        pytorch_grid = self.make_pytorch_grid(H, W)
+        pytorch_grid = self.make_pytorch_grid(H, W).type_as(x)
 
-        new_grid = Variable(torch.FloatTensor(B, H, W, 2)).type_as(x)
+        new_grid = Variable(torch.DoubleTensor(B, H, W, 2)).type_as(x)
         for b in range(B):
             new_grid[b, :, :, 0] = pytorch_grid[:, :, :, 0] + 2. * x[b, :, :, 0] / float(W-1)
             new_grid[b, :, :, 1] = pytorch_grid[:, :, :, 1] + 2. * x[b, :, :, 1] / float(H-1)

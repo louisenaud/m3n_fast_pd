@@ -52,7 +52,7 @@ class Scorer(nn.Module):
         score = torch.abs(img0_patch-img1_patch)
         score = torch.mean(torch.mean(score, dim=5), dim=4)
 
-        score = torch.mul(self.alpha, score)
+        score = torch.mul(self.alpha.type_as(img0_patch), score)
         score = torch.mean(score, dim=1)
 
         return score

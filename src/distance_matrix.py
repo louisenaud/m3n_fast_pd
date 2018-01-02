@@ -41,7 +41,7 @@ class Distance(nn.Module):
         """
         Computes \alpha \min( |x|, \beta)
         """
-        return self.alpha * torch.min(torch.abs(x), self.beta)
+        return self.alpha.type_as(x) * torch.min(torch.abs(x), self.beta.type_as(x))
 
     def forward(self, x):
         return self.phi(x)

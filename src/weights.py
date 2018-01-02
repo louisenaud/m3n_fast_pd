@@ -30,7 +30,7 @@ class Weights(nn.Module):
             self.inv_sigma = nn.Parameter(torch.FloatTensor([parameters['inv_sigma']]))
             self.alpha = nn.Parameter(torch.FloatTensor([parameters['alpha']]))
 
-        self.conv_3x3 = nn.Conv2d(num_input_channel, 2, (3, 3), padding=1)
+        self.conv_3x3 = nn.Conv2d(num_input_channel, 2, (3, 3), padding=1).type(torch.DoubleTensor)
         self.conv_3x3.weight.data[:,] = 0.
         self.conv_3x3.weight.data[0, :, 1, 1] = -1.
         self.conv_3x3.weight.data[0, :, 1, 2] = 1.
@@ -48,18 +48,18 @@ class Weights(nn.Module):
         self.inv_sigma.data.clamp(0., 1000.)
         self.alpha.data.clamp(0.1, 10.)
 
-    def forward(self, img):
+    def forward(self, img, type=torch.DoubleTensor):
         """
         Compute the weights from image.
         :param img:
         :return:
         """
-
-        img_map = torch.pow(self.conv_3x3.forward(img), self.alpha)
+        self.alpha.type(torch.DoubleTensor)
+        img_map = torch.pow(self.conv_3x3.forward(img), self.alpha.type(torch.DoubleTensor))
         img_map = img_map.permute(0, 2, 3, 1)
-        w_adapt = torch.exp(- self.inv_sigma * img_map)
+        w_adapt = torch.exp(- self.inv_sigma.type(torch.DoubleTensor) * img_map)
 
-        return self.lambda_cst + self.lambda_apt * w_adapt
+        return self.lambda_cst.type(torch.DoubleTensor) + self.lambda_apt.type(torch.DoubleTensor) * w_adapt
 
 
 if __name__ == '__main__':

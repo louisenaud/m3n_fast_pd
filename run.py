@@ -39,7 +39,7 @@ def id_generator(size=6, chars=string.ascii_letters + string.digits):
 
 
 parser = argparse.ArgumentParser(description='Run Primal Dual Net.')
-parser.add_argument('--use_cuda', type=bool, default=True,
+parser.add_argument('--use_cuda', type=bool, default=False,
                         help='Flag to use CUDA, if available')
 parser.add_argument('--max_epochs', type=int, default=50,
                     help='Number of epochs in the Primal Dual Net')
@@ -59,8 +59,6 @@ if args.log:
     writer = SummaryWriter()
 # Set parameters:
 max_epochs = args.max_epochs
-batch_size = 300
-dataset_size = 12
 
 # Transform dataset
 
@@ -69,11 +67,11 @@ transformations_d = transforms.Compose([transforms.CenterCrop((16, 16))])
 dd = KITTI("/Users/louisenaud1/Documents/data_disparity/KITTI/", indexer=indexer_KITTI, transform=transformations,
            depth_transform=transformations_d)
 if args.use_cuda:
-    dtype = torch.cuda.FloatTensor
+    dtype = torch.cuda.DoubleTensor
 else:
-    dtype = torch.FloatTensor
+    dtype = torch.DoubleTensor
 
-train_loader = DataLoader(dd, batch_size=1, num_workers=4)
+train_loader = DataLoader(dd, batch_size=8, num_workers=4)
 scorer = Scorer()
 weights = Weights()
 distance = Distance()
@@ -85,9 +83,9 @@ mrf = MRF(unaries, pairwise)
 net = M3N(energy, margin)
 
 # loss criterion for data
-criterion = torch.nn.MSELoss(size_average=False)
+criterion = torch.nn.MSELoss(size_average=True)
 # loss criterion for data smoothness
-criterion_g = torch.nn.MSELoss(size_average=False)
+criterion_g = torch.nn.MSELoss(size_average=True)
 # Adam Optimizer with initial learning rate of 1e-3
 optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
 # Scheduler to decrease the leaning rate at each epoch
@@ -105,25 +103,31 @@ net.train()
 x_min = torch.zeros([1])
 x_max = 5000. * torch.ones([1])
 for epoch in range(max_epochs):
+    loss_epoch = 0.
     for batch_id, (batch0, batch1, batchd) in enumerate(train_loader):
             # data, target = data.cuda(async=True), target.cuda(async=True) # On GPU
-        batch0, batch1, batchd = Variable(batch0), Variable(batch1), Variable(batchd)
-        x_opt = mrf.forward(batch0, batch1, 0., 4000.)
+        batch0, batch1, batchd = Variable(batch0).type(dtype), Variable(batch1).type(dtype), \
+                                 Variable(batchd).type(dtype)
+        x_opt = mrf.forward(batch0, batch1, 0., 200.)
+        x_opt = Variable(x_opt, requires_grad=True).type(dtype)
         # reset optimizer
         optimizer.zero_grad()
         # compute estimate for disparity
         batchd.squeeze_(1)
         output = net.forward(batch0, batch1, batchd, x_opt)
         # compute loss
-        loss = criterion(output, batchd)
+        loss = criterion(x_opt, batchd)
         # backpropagation
         loss.backward()
         # optimizer step
         optimizer.step()
-        if batch_id % 10 == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_id, len(train_loader.dataset),
-                100. * batch_id / len(train_loader), loss.data[0]))
+        loss_epoch += loss
+
+        # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+        #         epoch, batch_id, len(train_loader.dataset),
+        #         100. * batch_id / len(train_loader), loss.data[0]))
+
+    print("-------- Loss Epoch = ", loss_epoch)
     scheduler.step()
 
 

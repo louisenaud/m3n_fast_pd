@@ -106,7 +106,7 @@ class MRF(nn.Module):
         # Perform MAP inference
         x_sol = self.map_inference(unary_cost, w, dist_mat)
 
-        return x_sol + x_min
+        return torch.from_numpy(x_sol + x_min)
 
     def backward(self):
         raise NotImplementedError('Can not backpropagate through MAP inference function (using C++ code)')
