@@ -33,12 +33,12 @@ class Unary(nn.Module):
         self.patch_shape = patch_shape
         self.patch_extractor = PatchExtractor(self.patch_shape)
 
-    def paramterers_constraint(self):
+    def parameters_constraint(self):
         """
         Apply constraint on parameters
         """
 
-        self.score.paramterers_constraint()
+        self.score.parameters_constraint()
 
     def forward(self, img0, img1, x):
         """

@@ -34,7 +34,7 @@ class Scorer(nn.Module):
 
         self.alpha = nn.Parameter(self.alpha.unsqueeze(0).unsqueeze(2).unsqueeze(3))
 
-    def paramterers_constraint(self):
+    def parameters_constraint(self):
         """
         Apply box constraint on parameters
         """

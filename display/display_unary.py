@@ -38,7 +38,7 @@ unary = Unary(scorer)
 score = unary.forward(img0, img1, 10.)
 score = score.data[0, :, :].numpy()
 
-flow = Variable(torch.zeros(1, img0.size()[2], img0.size()[3], 2))
+flow = Variable(torch.zeros(1, img0.size()[2], img0.size()[3], 2)).type(torch.DoubleTensor)
 flow[:, ] = 0.
 flow[:, :, :, 0] = 10.
 

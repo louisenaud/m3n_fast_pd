@@ -21,13 +21,13 @@ class Energy(nn.Module):
         self.unary = unary
         self.pairwise = pairwise
 
-    def paramterers_constraint(self):
+    def parameters_constraint(self):
         """
         Apply constraint on parameters
         """
 
-        self.unary.paramterers_constraint()
-        self.pairwise.paramterers_constraint()
+        self.unary.parameters_constraint()
+        self.pairwise.parameters_constraint()
 
     def forward(self, img0, img1, x):
         """

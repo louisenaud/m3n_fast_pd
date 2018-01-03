@@ -38,7 +38,7 @@ class Weights(nn.Module):
         self.conv_3x3.weight.data[1, :, 2, 1] = 1.
 
 
-    def paramterers_constraint(self):
+    def parameters_constraint(self):
         """
         Apply box constraint on parameters
         """

@@ -20,14 +20,14 @@ class TestPairwise(unittest.TestCase):
 
     def create_inputs(self):
         B, C, H, W = self.inputs_shape
-        img0_patch = Variable(torch.FloatTensor(B, C, H, W).zero_())
-        x = Variable(torch.FloatTensor(B, H, W).zero_())
+        img0_patch = Variable(torch.DoubleTensor(B, C, H, W).zero_())
+        x = Variable(torch.DoubleTensor(B, H, W).zero_())
 
         return img0_patch, x
 
     def create_outputs(self):
         B, H, W, C = self.outputs_shape
-        return Variable(torch.FloatTensor(B, H, W, C).zero_())
+        return Variable(torch.DoubleTensor(B, H, W, C).zero_())
 
     def test_constructor(self):
 
@@ -67,7 +67,7 @@ class TestPairwise(unittest.TestCase):
             optimizer.step()
 
             # Constraints
-            module.paramterers_constraint()
+            module.parameters_constraint()
 
 
 if __name__ == '__main__':

@@ -31,16 +31,16 @@ class TestM3N(unittest.TestCase):
 
     def create_inputs(self):
         B, C, H, W = self.inputs_shape
-        img0_patch = Variable(torch.FloatTensor(B, C, H, W).zero_())
-        img1_patch = Variable(torch.FloatTensor(B, C, H, W).zero_())
-        x_gt = Variable(torch.FloatTensor(B, H, W).zero_())
-        x_min = Variable(torch.FloatTensor(B, H, W).zero_())
+        img0_patch = Variable(torch.DoubleTensor(B, C, H, W).zero_())
+        img1_patch = Variable(torch.DoubleTensor(B, C, H, W).zero_())
+        x_gt = Variable(torch.DoubleTensor(B, H, W).zero_())
+        x_min = Variable(torch.DoubleTensor(B, H, W).zero_())
 
         return img0_patch, img1_patch, x_gt, x_min
 
     def create_outputs(self):
         B = self.outputs_shape
-        return Variable(torch.FloatTensor(B).zero_())
+        return Variable(torch.DoubleTensor(B).zero_())
 
     def test_constructor(self):
         module = M3N(self.energy, self.margin)
@@ -78,7 +78,7 @@ class TestM3N(unittest.TestCase):
             optimizer.step()
 
             # Constraints
-            module.paramterers_constraint()
+            module.parameters_constraint()
 
 
 if __name__ == '__main__':

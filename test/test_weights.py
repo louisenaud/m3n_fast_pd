@@ -23,11 +23,11 @@ class TestWeights(unittest.TestCase):
 
     def create_inputs(self):
         B, C, H, W = self.inputs_shape
-        return Variable(torch.FloatTensor(B, C, H, W).zero_())
+        return Variable(torch.DoubleTensor(B, C, H, W).zero_())
 
     def create_outputs(self):
         B, H, W, C = self.outputs_shape
-        return Variable(torch.FloatTensor(B, H, W, C).zero_())
+        return Variable(torch.DoubleTensor(B, H, W, C).zero_())
 
     def test_constructor(self):
         weights = Weights()
@@ -67,7 +67,7 @@ class TestWeights(unittest.TestCase):
             optimizer.step()
 
             # Constraints
-            weights.paramterers_constraint()
+            weights.parameters_constraint()
 
 
 if __name__ == '__main__':

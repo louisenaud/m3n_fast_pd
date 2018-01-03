@@ -1,5 +1,5 @@
 import unittest
-from src.fast_pd.fast_pd import PyFastPd
+from src.fast_pd import PyFastPd
 import torch
 from torch.autograd import Variable
 

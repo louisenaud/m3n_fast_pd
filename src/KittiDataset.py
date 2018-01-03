@@ -15,18 +15,25 @@ from torchvision import transforms
 import torch
 import numpy
 
-import imageio
 import png
 
 from PIL import Image
+from scipy.misc import imread
+import matplotlib.pyplot as plt
 
 
 def read_disparity(img_path):
-    im2 = imageio.imread(img_path)
+    """
+    Reads a 16-bit depth png
+    :param img_path:
+    :return:
+    """
     r = png.Reader(filename=img_path)
     row_count, column_count, pngdata, meta = r.asDirect()
     image_2d = numpy.vstack(itertools.imap(numpy.uint16, pngdata))
     im2 = image_2d.astype(float)
+    im2 /= 255.
+    print(numpy.max(im2))
     return Image.fromarray(im2).convert("L")
 
 
@@ -40,7 +47,7 @@ def indexer_KITTI(root, train=True):
     #TODO(louise): add training / testing configuration
     stereo_l = os.path.join(root, 'image_0')
     stereo_r = os.path.join(root, 'image_1')
-    disparity = os.path.join(root, 'disp_refl_noc')
+    disparity = os.path.join(root, 'disp_noc')
     images = []
 
     for l, r, d in itertools.izip(sorted(os.listdir(stereo_l)),

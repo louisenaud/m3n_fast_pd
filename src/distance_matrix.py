@@ -1,4 +1,8 @@
-
+"""
+Project:    m3n_fast_pd
+File:       distance_matrix.py
+Created by: louise
+"""
 # Pytorch module
 # Input: #label L
 # Ouput: distance matrix LxL or 1xLxL
@@ -29,7 +33,7 @@ class Distance(nn.Module):
             self.alpha = nn.Parameter(torch.FloatTensor([parameters['alpha']]))
             self.beta = nn.Parameter(torch.FloatTensor([parameters['beta']]))
 
-    def paramterers_constraint(self):
+    def parameters_constraint(self):
         """
         Apply box constraint on parameters
         """

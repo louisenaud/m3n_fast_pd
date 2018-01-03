@@ -26,8 +26,8 @@ class TestMRF(unittest.TestCase):
 
     def create_inputs(self):
         B, C, H, W = self.inputs_shape
-        img0 = Variable(torch.FloatTensor(B, C, H, W).zero_())
-        img1 = Variable(torch.FloatTensor(B, C, H, W).zero_())
+        img0 = Variable(torch.DoubleTensor(B, C, H, W).zero_())
+        img1 = Variable(torch.DoubleTensor(B, C, H, W).zero_())
         x_min = 0
         x_max = 10
 
@@ -35,7 +35,7 @@ class TestMRF(unittest.TestCase):
 
     def create_outputs(self):
         (B, H, W) = self.outputs_shape
-        return Variable(torch.FloatTensor(B, H, W).zero_())
+        return Variable(torch.DoubleTensor(B, H, W).zero_())
 
     def test_constructor(self):
         module = MRF(self.unary, self.pairwise)

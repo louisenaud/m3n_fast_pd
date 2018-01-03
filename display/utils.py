@@ -14,6 +14,6 @@ def img_to_torch(img_numpy):
 
     img = np.transpose(img_numpy, [2, 0, 1])
     img = np.expand_dims(img, axis=0)
-    img = torch.from_numpy(img)
+    img = torch.from_numpy(img).type(torch.DoubleTensor)
 
     return img

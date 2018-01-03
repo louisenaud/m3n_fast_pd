@@ -11,7 +11,7 @@ Created by: louise
 import torch
 import torch.nn as nn
 import numpy as np
-from fast_pd.fast_pd import PyFastPd
+from fast_pd import PyFastPd
 
 class MRF(nn.Module):
     def __init__(self, unary, pairwise):

@@ -21,16 +21,15 @@ class Pairwise(nn.Module):
         self.weights = weights
         self.distance = distance
 
-    def paramterers_constraint(self):
-
-        self.weights.paramterers_constraint()
-        self.distance.paramterers_constraint()
+    def parameters_constraint(self):
+        self.weights.parameters_constraint()
+        self.distance.parameters_constraint()
 
     def gradient_operator(self, x):
         """
-
-        :param x:
-        :return:
+        Computes gradient of an image.
+        :param x: PyTorch Variable
+        :return: PyTorch Variable
         """
         B, H, W = x.size()[0:3]
 
@@ -45,9 +44,9 @@ class Pairwise(nn.Module):
     def forward(self, img0, x):
         """
 
-        :param img0:
-        :param x:
-        :return:
+        :param img0: PyTorch Variable
+        :param x: PyTorch Variable
+        :return: PyTorch Variable
         """
         w = self.weights.forward(img0)
         gx = self.gradient_operator(x)

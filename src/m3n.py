@@ -19,12 +19,12 @@ class M3N(nn.Module):
         self.energy = energy
         self.margin = margin
 
-    def paramterers_constraint(self):
+    def parameters_constraint(self):
         """
         Apply constraint on parameters
         """
 
-        self.energy.paramterers_constraint()
+        self.energy.parameters_constraint()
 
     def forward(self, img0, img1, x_gt, x_min):
         # Get energy of x_gt and x_min

@@ -13,6 +13,7 @@ import torch
 from torch.autograd import Variable
 
 from torch.utils.data import DataLoader
+from torch.utils.data.sampler import RandomSampler
 from torchvision import transforms
 
 from src.scorer import Scorer
@@ -61,17 +62,19 @@ if args.log:
 max_epochs = args.max_epochs
 
 # Transform dataset
-
-transformations = transforms.Compose([transforms.CenterCrop((16, 16)), transforms.ToTensor()])
-transformations_d = transforms.Compose([transforms.CenterCrop((16, 16))])
-dd = KITTI("/Users/louisenaud1/Documents/data_disparity/KITTI/", indexer=indexer_KITTI, transform=transformations,
+patch_size = 128
+transformations = transforms.Compose([transforms.CenterCrop((patch_size, patch_size)), transforms.ToTensor()])
+transformations_d = transforms.Compose([transforms.CenterCrop((patch_size, patch_size))])
+dd = KITTI("/media/louise/data/datasets/KITTI/stereo/training", indexer=indexer_KITTI, transform=transformations,
            depth_transform=transformations_d)
+# dd = KITTI("/Users/louisenaud1/Documents/data_disparity/KITTI/", indexer=indexer_KITTI, transform=transformations,
+#            depth_transform=transformations_d)
 if args.use_cuda:
     dtype = torch.cuda.DoubleTensor
 else:
     dtype = torch.DoubleTensor
 
-train_loader = DataLoader(dd, batch_size=8, num_workers=4)
+train_loader = DataLoader(dd, batch_size=5, num_workers=4, shuffle=False)
 scorer = Scorer()
 weights = Weights()
 distance = Distance()
@@ -79,13 +82,11 @@ unaries = Unary(scorer)
 pairwise = Pairwise(weights, distance)
 energy = Energy(unaries, pairwise)
 margin = Margin()
-mrf = MRF(unaries, pairwise)
-net = M3N(energy, margin)
+mrf = MRF(unaries, pairwise).type(dtype)
+net = M3N(energy, margin).type(dtype)
 
 # loss criterion for data
 criterion = torch.nn.MSELoss(size_average=True)
-# loss criterion for data smoothness
-criterion_g = torch.nn.MSELoss(size_average=True)
 # Adam Optimizer with initial learning rate of 1e-3
 optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
 # Scheduler to decrease the leaning rate at each epoch
@@ -108,7 +109,7 @@ for epoch in range(max_epochs):
             # data, target = data.cuda(async=True), target.cuda(async=True) # On GPU
         batch0, batch1, batchd = Variable(batch0).type(dtype), Variable(batch1).type(dtype), \
                                  Variable(batchd).type(dtype)
-        x_opt = mrf.forward(batch0, batch1, 0., 200.)
+        x_opt = mrf.forward(batch0, batch1, 0., 255.)
         x_opt = Variable(x_opt, requires_grad=True).type(dtype)
         # reset optimizer
         optimizer.zero_grad()
@@ -121,13 +122,14 @@ for epoch in range(max_epochs):
         loss.backward()
         # optimizer step
         optimizer.step()
-        loss_epoch += loss
+        loss_epoch += torch.sum(output)
+        it += 1
 
         # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
         #         epoch, batch_id, len(train_loader.dataset),
         #         100. * batch_id / len(train_loader), loss.data[0]))
 
-    print("-------- Loss Epoch = ", loss_epoch)
+    print("-------- Loss Epoch = ", torch.sum(output))
     scheduler.step()
 
 

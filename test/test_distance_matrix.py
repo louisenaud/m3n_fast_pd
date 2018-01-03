@@ -75,7 +75,7 @@ class TestDistance(unittest.TestCase):
             optimizer.step()
 
             # Constraints
-            module.paramterers_constraint()
+            module.parameters_constraint()
 
 
 if __name__ == '__main__':
