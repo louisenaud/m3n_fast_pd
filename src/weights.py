@@ -54,8 +54,8 @@ class Weights(nn.Module):
         :param img:
         :return:
         """
-        self.alpha.type(torch.DoubleTensor)
-        img_map = torch.pow(self.conv_3x3.forward(img), self.alpha.type(torch.DoubleTensor))
+        self.alpha.type_as(img)
+        img_map = torch.pow(self.conv_3x3.forward(img), self.alpha.type_as(img))
         img_map = img_map.permute(0, 2, 3, 1)
         w_adapt = torch.exp(- self.inv_sigma.type(torch.DoubleTensor) * img_map)
 

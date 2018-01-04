@@ -62,7 +62,7 @@ if args.log:
 max_epochs = args.max_epochs
 
 # Transform dataset
-patch_size = 128
+patch_size = 16
 transformations = transforms.Compose([transforms.CenterCrop((patch_size, patch_size)), transforms.ToTensor()])
 transformations_d = transforms.Compose([transforms.CenterCrop((patch_size, patch_size))])
 dd = KITTI("/media/louise/data/datasets/KITTI/stereo/training", indexer=indexer_KITTI, transform=transformations,
@@ -96,40 +96,41 @@ params = list(net.parameters())
 loss_history = []
 it = 0
 
-
+print(params)
 # Start training
 t0 = time.time()
 net.train()
 
 x_min = torch.zeros([1])
-x_max = 5000. * torch.ones([1])
+x_max = 255. * torch.ones([1])
 for epoch in range(max_epochs):
     loss_epoch = 0.
     for batch_id, (batch0, batch1, batchd) in enumerate(train_loader):
             # data, target = data.cuda(async=True), target.cuda(async=True) # On GPU
         batch0, batch1, batchd = Variable(batch0).type(dtype), Variable(batch1).type(dtype), \
                                  Variable(batchd).type(dtype)
-        x_opt = mrf.forward(batch0, batch1, 0., 255.)
+        x_opt = mrf.forward(batch0, batch1, 1., 255.)
         x_opt = Variable(x_opt, requires_grad=True).type(dtype)
         # reset optimizer
         optimizer.zero_grad()
         # compute estimate for disparity
         batchd.squeeze_(1)
         output = net.forward(batch0, batch1, batchd, x_opt)
+        print("output =", output)
         # compute loss
-        loss = criterion(x_opt, batchd)
+        loss = criterion(output, Variable(torch.zeros(output.size())).type(dtype))
         # backpropagation
         loss.backward()
         # optimizer step
         optimizer.step()
-        loss_epoch += torch.sum(output)
+        loss_epoch += loss.data[0]
         it += 1
 
         # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
         #         epoch, batch_id, len(train_loader.dataset),
         #         100. * batch_id / len(train_loader), loss.data[0]))
 
-    print("-------- Loss Epoch = ", torch.sum(output))
+    print("-------- Loss Epoch = ", loss_epoch)
     scheduler.step()
 
 

@@ -33,7 +33,7 @@ def read_disparity(img_path):
     image_2d = numpy.vstack(itertools.imap(numpy.uint16, pngdata))
     im2 = image_2d.astype(float)
     im2 /= 255.
-    print(numpy.max(im2))
+    im2[im2==0.] = 10.
     return Image.fromarray(im2).convert("L")
 
 
