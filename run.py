@@ -27,6 +27,7 @@ from src.weights import Weights
 from src.distance_matrix import Distance
 from src.KittiDataset import KITTI, indexer_KITTI
 
+import matplotlib.pyplot as plt
 
 
 def id_generator(size=6, chars=string.ascii_letters + string.digits):
@@ -40,13 +41,14 @@ def id_generator(size=6, chars=string.ascii_letters + string.digits):
 
 
 parser = argparse.ArgumentParser(description='Run Primal Dual Net.')
-parser.add_argument('--use_cuda', type=bool, default=False,
+parser.add_argument('--use_cuda', type=bool, default=True,
                         help='Flag to use CUDA, if available')
 parser.add_argument('--max_epochs', type=int, default=50,
                     help='Number of epochs in the Primal Dual Net')
 parser.add_argument('--save_flag', type=bool, default=True,
                     help='Flag to save or not the result images')
-parser.add_argument('--log', type=bool, help="Flag to log loss in tensorboard", default=False)
+parser.add_argument('--log', type=bool, help="Flag to log loss in tensorboard",
+                    default=True)
 parser.add_argument('--out_folder', help="output folder for images",
                     default="firetiti__20it_50_epochs_sigma005_006_smooth_loss_lr_10-3_batch300_dataset_/")
 parser.add_argument('--clip', type=float, default=0.1,
@@ -57,12 +59,12 @@ args = parser.parse_args()
 if args.log:
     from tensorboard import SummaryWriter
     # Keep track of loss in tensorboard
-    writer = SummaryWriter()
+    writer = SummaryWriter("M3N")
 # Set parameters:
 max_epochs = args.max_epochs
 
 # Transform dataset
-patch_size = 16
+patch_size = 50
 transformations = transforms.Compose([transforms.CenterCrop((patch_size, patch_size)), transforms.ToTensor()])
 transformations_d = transforms.Compose([transforms.CenterCrop((patch_size, patch_size))])
 dd = KITTI("/media/louise/data/datasets/KITTI/stereo/training", indexer=indexer_KITTI, transform=transformations,
@@ -74,7 +76,7 @@ if args.use_cuda:
 else:
     dtype = torch.DoubleTensor
 
-train_loader = DataLoader(dd, batch_size=5, num_workers=4, shuffle=False)
+train_loader = DataLoader(dd, batch_size=10, num_workers=1, shuffle=True)
 scorer = Scorer()
 weights = Weights()
 distance = Distance()
@@ -96,7 +98,6 @@ params = list(net.parameters())
 loss_history = []
 it = 0
 
-print(params)
 # Start training
 t0 = time.time()
 net.train()
@@ -124,6 +125,8 @@ for epoch in range(max_epochs):
         # optimizer step
         optimizer.step()
         loss_epoch += loss.data[0]
+        if args.log and it % 10 ==0:
+            writer.add_scalar("loss_batch", torch.sum(loss).data[0], it)
         it += 1
 
         # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
@@ -131,8 +134,15 @@ for epoch in range(max_epochs):
         #         100. * batch_id / len(train_loader), loss.data[0]))
 
     print("-------- Loss Epoch = ", loss_epoch)
+    if args.log:
+        writer.add_scalar("loss_epoch", loss_epoch, it)
     scheduler.step()
 
 
 t1 = time.time()
 print("Elapsed time in minutes :", (t1 - t0) / 60.)
+
+x_est = mrf.forward(dd[0][0], dd[0][1], 1., 255.)
+plt.figure()
+plt.imshow(x_est.data.cpu().numpy())
+plt.show()

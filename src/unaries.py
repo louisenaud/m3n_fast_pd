@@ -20,7 +20,8 @@ from patch_extractor import PatchExtractor
 
 
 class Unary(nn.Module):
-    """ Return score for two img_patch
+    """
+    Return score for two img_patch
         img_patch: B x C x H x W x Hp x Wp
         x: B x H x W
         score: B x H x W
