@@ -29,7 +29,7 @@ class Energy(nn.Module):
         self.unary.parameters_constraint()
         self.pairwise.parameters_constraint()
 
-    def forward(self, img0, img1, x):
+    def forward(self, img0, img1, x, mask=None):
         """
 
         :param img0:
@@ -37,10 +37,10 @@ class Energy(nn.Module):
         :param x:
         :return:
         """
-        unary = self.unary.forward(img0, img1, x)
+        unary = self.unary.forward(img0, img1, x, mask)
         unary_cost = torch.sum(torch.sum(unary, dim=2), dim=1)
 
-        pairwise = self.pairwise.forward(img0, x)
+        pairwise = self.pairwise.forward(img0, x, mask)
         pairwise_cost = torch.sum(torch.sum(torch.sum(pairwise, dim=3), dim=2), dim=1)
 
         return unary_cost + pairwise_cost

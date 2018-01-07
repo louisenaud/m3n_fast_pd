@@ -12,7 +12,7 @@ class Margin(nn.Module):
     def __init__(self):
         super(Margin, self).__init__()
 
-    def forward(self, x_ref, x):
+    def forward(self, x_ref, x, mask=None):
         """
 
         :param x_ref:
@@ -20,5 +20,8 @@ class Margin(nn.Module):
         :return:
         """
         margin_cost = torch.clamp(torch.abs(x_ref - x), 0, 1)
-        sum_margin_cost = torch.sum(torch.sum(margin_cost, dim=2), dim=1)
-        return sum_margin_cost
+
+        if mask is not None:
+            margin_cost = torch.mul(mask, margin_cost)
+
+        return margin_cost

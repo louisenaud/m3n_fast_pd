@@ -27,6 +27,9 @@ from src.weights import Weights
 from src.distance_matrix import Distance
 from src.KittiDataset import KITTI, indexer_KITTI
 
+
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
@@ -41,9 +44,9 @@ def id_generator(size=6, chars=string.ascii_letters + string.digits):
 
 
 parser = argparse.ArgumentParser(description='Run Primal Dual Net.')
-parser.add_argument('--use_cuda', type=bool, default=True,
+parser.add_argument('--use_cuda', type=bool, default=False,
                         help='Flag to use CUDA, if available')
-parser.add_argument('--max_epochs', type=int, default=50,
+parser.add_argument('--max_epochs', type=int, default=15,
                     help='Number of epochs in the Primal Dual Net')
 parser.add_argument('--save_flag', type=bool, default=True,
                     help='Flag to save or not the result images')
@@ -67,10 +70,10 @@ max_epochs = args.max_epochs
 patch_size = 50
 transformations = transforms.Compose([transforms.CenterCrop((patch_size, patch_size)), transforms.ToTensor()])
 transformations_d = transforms.Compose([transforms.CenterCrop((patch_size, patch_size))])
-dd = KITTI("/media/louise/data/datasets/KITTI/stereo/training", indexer=indexer_KITTI, transform=transformations,
-           depth_transform=transformations_d)
-# dd = KITTI("/Users/louisenaud1/Documents/data_disparity/KITTI/", indexer=indexer_KITTI, transform=transformations,
-#            depth_transform=transformations_d)
+#dd = KITTI("/media/louise/data/datasets/KITTI/stereo/training", indexer=indexer_KITTI, transform=transformations,
+#           depth_transform=transformations_d)
+dd = KITTI("/Users/louisenaud1/m3n_fast_pd/data/", indexer=indexer_KITTI, transform=transformations,
+    depth_transform=transformations_d)
 if args.use_cuda:
     dtype = torch.cuda.DoubleTensor
 else:
@@ -110,7 +113,7 @@ for epoch in range(max_epochs):
             # data, target = data.cuda(async=True), target.cuda(async=True) # On GPU
         batch0, batch1, batchd = Variable(batch0).type(dtype), Variable(batch1).type(dtype), \
                                  Variable(batchd).type(dtype)
-        x_opt = mrf.forward(batch0, batch1, 1., 255.)
+        x_opt = mrf.forward(batch0, batch1, 1., 255., batchd, margin)
         x_opt = Variable(x_opt, requires_grad=True).type(dtype)
         # reset optimizer
         optimizer.zero_grad()
@@ -141,8 +144,11 @@ for epoch in range(max_epochs):
 
 t1 = time.time()
 print("Elapsed time in minutes :", (t1 - t0) / 60.)
-
-x_est = mrf.forward(dd[0][0], dd[0][1], 1., 255.)
+img1 = Variable(dd[0][0].unsqueeze_(0)).type(dtype)
+img2 = Variable(dd[0][1].unsqueeze_(0)).type(dtype)
+x_est = mrf.forward(img1, img2, 1., 255.)
 plt.figure()
-plt.imshow(x_est.data.cpu().numpy())
+plt.imshow(x_est.squeeze_(0).cpu().numpy())
+plt.imsave()
+plt.savefig('res_50.png')
 plt.show()

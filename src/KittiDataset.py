@@ -18,8 +18,6 @@ import numpy
 import png
 
 from PIL import Image
-from scipy.misc import imread
-import matplotlib.pyplot as plt
 
 
 def read_disparity(img_path):

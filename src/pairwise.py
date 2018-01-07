@@ -41,7 +41,19 @@ class Pairwise(nn.Module):
 
         return torch.stack([g_v, g_h], dim=3)
 
-    def forward(self, img0, x):
+    def gradient_mask(self, mask):
+
+        B, H, W = mask.size()[0:3]
+
+        g_v = torch.zeros_like(mask)
+        g_v[:, 0:H - 1, :] = torch.mul(mask[:, 0:H - 1, :], mask[:, 1:, :])
+
+        g_h = torch.zeros_like(mask)
+        g_h[:, :, 0:W - 1] = torch.mul(mask[:, :, 0:W - 1], mask[:, :, 1:])
+
+        return torch.stack([g_v, g_h], dim=3)
+
+    def forward(self, img0, x, mask=None):
         """
 
         :param img0: PyTorch Variable
@@ -51,6 +63,12 @@ class Pairwise(nn.Module):
         w = self.weights.forward(img0)
         gx = self.gradient_operator(x)
         d = self.distance(gx)
+        cost = torch.mul(w, d)
 
-        return torch.mul(w, d)
+        # Apply mask
+        if mask is not None:
+            g_mask = self.gradient_mask(mask)
+            cost = torch.mul(g_mask, cost)
+
+        return cost
 

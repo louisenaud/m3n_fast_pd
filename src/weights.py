@@ -6,9 +6,6 @@ Created by: louise
 import torch
 import torch.nn as nn
 
-import matplotlib.pyplot as plt
-
-
 class Weights(nn.Module):
     """
     Compute the regularization weights from an image:

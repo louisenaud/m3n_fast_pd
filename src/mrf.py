@@ -11,7 +11,7 @@ Created by: louise
 import torch
 import torch.nn as nn
 import numpy as np
-from fast_pd import PyFastPd
+from fast_pd.fast_pd import PyFastPd
 
 class MRF(nn.Module):
     def __init__(self, unary, pairwise):
@@ -33,7 +33,7 @@ class MRF(nn.Module):
 
         return w, dist_mat
 
-    def get_unary_cost(self, img0_patch, img1, x_disp):
+    def get_unary_cost(self, img0_patch, img1, x_disp, x_gt=None, margin=None):
 
         # Extract patch form img1 for current x
         img1_patch = self.unary.patch_extractor.forward(img1, x_disp)
@@ -43,9 +43,14 @@ class MRF(nn.Module):
 
         del img1_patch
 
+        # Add margin
+        if x_gt is not None:
+            margin_cost = margin.forward(x_gt, x_disp)
+            unary_cost = unary_cost.unsqueeze(1) - margin_cost
+
         return unary_cost
 
-    def get_unary_costs(self, img0, img1, x_min, x_max):
+    def get_unary_costs(self, img0, img1, x_min, x_max, x_gt=None, margin=None):
 
         B, C, H, W = img0.size()
 
@@ -57,7 +62,7 @@ class MRF(nn.Module):
 
         for l in range(int(L)):
             x_disp = x_min + l
-            cost = self.get_unary_cost(img0_patch, img1, x_disp)
+            cost = self.get_unary_cost(img0_patch, img1, x_disp, x_gt, margin)
             unary_cost[:, :, :, l] = cost.data
 
         return unary_cost.cpu().numpy()
@@ -95,13 +100,13 @@ class MRF(nn.Module):
 
         return x_min
 
-    def forward(self, img0, img1, x_min, x_max):
+    def forward(self, img0, img1, x_min, x_max, x_opt=None, margin=None):
 
         # Pairwise costs
         w, dist_mat = self.get_pairwise_costs(img0, x_min, x_max)
 
         # Unary costs
-        unary_cost = self.get_unary_costs(img0, img1, x_min, x_max)
+        unary_cost = self.get_unary_costs(img0, img1, x_min, x_max, x_opt, margin)
 
         # Perform MAP inference
         x_sol = self.map_inference(unary_cost, w, dist_mat)

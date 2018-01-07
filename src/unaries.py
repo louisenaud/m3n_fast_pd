@@ -41,7 +41,7 @@ class Unary(nn.Module):
 
         self.score.parameters_constraint()
 
-    def forward(self, img0, img1, x):
+    def forward(self, img0, img1, x, mask=None):
         """
         Computes unary terms for grid.
         :param img0:
@@ -55,5 +55,9 @@ class Unary(nn.Module):
 
         # Compute score
         unary = self.score(img0_patch, img1_patch)
+
+        # Apply mask
+        if mask is not None:
+            unary = torch.mul(mask, unary)
 
         return unary
