@@ -63,14 +63,15 @@ if args.log:
     from tensorboard import SummaryWriter
 
     # Keep track of loss in tensorboard
-    writer = SummaryWriter("M3N")
+    writer = SummaryWriter("M3N_ziiziiiii")
 # Set parameters:
 max_epochs = args.max_epochs
 
 # Transform dataset
-patch_size = 50
-transformations = transforms.Compose([transforms.CenterCrop((patch_size, patch_size)), transforms.ToTensor()])
-transformations_d = transforms.Compose([transforms.CenterCrop((patch_size, patch_size))])
+patch_size_1 = 300
+patch_size_2 = 500
+transformations = transforms.Compose([transforms.CenterCrop((patch_size_1, patch_size_2)), transforms.ToTensor()])
+transformations_d = transforms.Compose([transforms.CenterCrop((patch_size_1, patch_size_2))])
 # dd = KITTI("/media/louise/data/datasets/KITTI/stereo/training", indexer=indexer_KITTI, transform=transformations,
 #           depth_transform=transformations_d)
 dd = KITTI("/Users/louisenaud1/m3n_fast_pd/data/", indexer=indexer_KITTI, transform=transformations,
@@ -96,7 +97,7 @@ criterion = torch.nn.MSELoss(size_average=True)
 # Adam Optimizer with initial learning rate of 1e-3
 optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
 # Scheduler to decrease the leaning rate at each epoch
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.08)
 params = list(net.parameters())
 # Store losses and energies for plotting
 loss_history = []
@@ -111,29 +112,38 @@ x_max = 255. * torch.ones([1])
 for epoch in range(max_epochs):
     loss_epoch = 0.
     for batch_id, (batch0, batch1, batchd, batchm) in enumerate(train_loader):
-        # data, target = data.cuda(async=True), target.cuda(async=True) # On GPU
-        batch0, batch1, batchd = Variable(batch0).type(dtype), Variable(batch1).type(dtype), \
-                                 Variable(batchd).type(dtype)
-        batchm = Variable(batchm).type(dtype)
-        x_opt = mrf.forward(batch0, batch1, 1., 255., batchd, margin)
-        x_opt = Variable(x_opt, requires_grad=True).type(dtype)
-        # reset optimizer
-        optimizer.zero_grad()
-        # compute estimate for disparity
-        batchd.squeeze_(1)
-        batchm.squeeze_(1)
-        output = net.forward(batch0, batch1, batchd, x_opt, batchm)
-        print("output =", output)
-        # compute loss
-        loss = criterion(output, Variable(torch.zeros(output.size())).type(dtype))
-        # backpropagation
-        loss.backward()
-        # optimizer step
-        optimizer.step()
-        loss_epoch += loss.data[0]
-        if args.log and it % 10 == 0:
-            writer.add_scalar("loss_batch", torch.sum(loss).data[0], it)
-        it += 1
+        if batch_id % 10 == 0:
+            # data, target = data.cuda(async=True), target.cuda(async=True) # On GPU
+
+            # For computing x_opt
+            batch0, batch1, batchd = Variable(batch0, volatile=True).type(dtype), Variable(batch1, volatile=True).type(dtype), \
+                                     Variable(batchd, volatile=True).type(dtype)
+
+            batchm = Variable(batchm).type(dtype)
+            x_opt = mrf.forward(batch0, batch1, 1., 255., batchd, margin)
+            x_opt = Variable(x_opt, requires_grad=False).type(dtype)
+            # reset optimizer
+            optimizer.zero_grad()
+
+            # compute estimate for disparity
+            batch0.volatile = False
+            batch1.volatile = False
+            batchd.volatile = False
+
+            batchd.squeeze_(1)
+            batchm.squeeze_(1)
+            output = net.forward(batch0, batch1, batchd, x_opt, batchm)
+            print("output =", output)
+            # compute loss
+            loss = criterion(output, Variable(torch.zeros(output.size())).type(dtype))
+            # backpropagation
+            loss.backward()
+            # optimizer step
+            optimizer.step()
+            loss_epoch += loss.data[0]
+            if args.log and it % 10 == 0:
+                writer.add_scalar("loss_batch", torch.sum(loss).data[0], it)
+            it += 1
 
         # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
         #         epoch, batch_id, len(train_loader.dataset),
@@ -151,5 +161,5 @@ img2 = Variable(dd[0][1].unsqueeze_(0)).type(dtype)
 x_est = mrf.forward(img1, img2, 1., 255.)
 plt.figure()
 plt.imshow(x_est.squeeze_(0).cpu().numpy())
-plt.savefig('res_50_mask.png')
+plt.savefig('res_300_500_mask.png')
 plt.show()
