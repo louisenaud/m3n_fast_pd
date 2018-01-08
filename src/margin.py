@@ -14,10 +14,11 @@ class Margin(nn.Module):
 
     def forward(self, x_ref, x, mask=None):
         """
-
-        :param x_ref:
-        :param x:
-        :return:
+        Compute margin in energy.
+        :param x_ref: Pytorch Variable, [BxHxW]
+        :param x: Pytorch Variable, [BxHxW]
+        :param mask: Pytorch Variable, [BxHxW]
+        :return: Pytorch Variable, [BxHxW]
         """
         margin_cost = torch.clamp(torch.abs(x_ref - x), 0, 1)
 

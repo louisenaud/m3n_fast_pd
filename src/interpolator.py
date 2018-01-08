@@ -25,7 +25,9 @@ class Interpolator(nn.Module):
             grid lives in [0, H-1] x [0, W-1]
             grid[0, 10, 5, 0] = 10
             grid[0, 10, 5, 1] = 5
-
+        :param H: int, height of grid
+        :param W: int, width of grid
+        :return Pytorch Variable, [1xHxWx2]
         """
 
         grid_h = torch.arange(start=0, end=H, step=1)
@@ -39,14 +41,14 @@ class Interpolator(nn.Module):
 
     def make_pytorch_grid(self, H, W):
         """
-        Create Grid in Pytorch.
-
-        :param H: int
-        :param W: int
-        :return: grid of dimension 1 x H x W x 2
+        Create Grid of dimension 1 x H x W x 2 in Pytorch.
         grid lives in [-1., 1.] x [-1., 1.]
         grid[0, 0, 0, 0] = -1.
-            grid[0, 0, W-1, 1] = 1.
+        grid[0, 0, W-1, 1] = 1.
+
+        :param H: int, height of grid.
+        :param W: int, width of grif.
+        :return: Pytorch Variable, [1xHxWx2]
         """
 
         grid = self.make_grid(H, W)
@@ -75,7 +77,7 @@ class Interpolator(nn.Module):
 
     def forward(self, img, x):
         """
-
+        Interpolates grid.
         :param img:
         :param x:
         :return:

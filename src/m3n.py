@@ -23,11 +23,21 @@ class M3N(nn.Module):
     def parameters_constraint(self):
         """
         Apply constraint on parameters
+        :return
         """
-
         self.energy.parameters_constraint()
 
     def forward(self, img0, img1, x_gt, x_min, mask=None):
+        """
+        Run M3N optimization on img0, img1
+        :param img0: Pytorch Variable [BxCxHxW], batch of left images.
+        :param img1: Pytorch Variable [BxCxHxW], batch of right images.
+        :param x_gt: Pytorch Variable [BxHxW], GT disparity.
+        :param x_min: Pytorch Variable [BxHxW], x estimated by MRF.
+        :param mask: Pytorch Variable [BxHxW], batch of mask for
+        disparity invalid pixels.
+        :return: Pytorch Variable [B], energies for each image in the batch.
+        """
         # Get energy of x_gt and x_min
         nrg_gt = self.energy.forward(img0, img1, x_gt, mask)
         nrg_min = self.energy.forward(img0, img1, x_min, mask)

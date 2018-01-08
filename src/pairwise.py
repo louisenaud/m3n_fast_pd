@@ -22,6 +22,10 @@ class Pairwise(nn.Module):
         self.distance = distance
 
     def parameters_constraint(self):
+        """
+        Applies parameters constraints of weights and distance matrix.
+        :return:
+        """
         self.weights.parameters_constraint()
         self.distance.parameters_constraint()
 
@@ -42,7 +46,11 @@ class Pairwise(nn.Module):
         return torch.stack([g_v, g_h], dim=3)
 
     def gradient_mask(self, mask):
-
+        """
+        Computes the mask gradient.
+        :param mask: Pytorch Variable [BxHxW]
+        :return: Pytorch Variable [Bx2xHxW]
+        """
         B, H, W = mask.size()[0:3]
 
         g_v = torch.zeros_like(mask)
@@ -55,9 +63,11 @@ class Pairwise(nn.Module):
 
     def forward(self, img0, x, mask=None):
         """
-
+        Computes the pairwise terms of img0.
         :param img0: PyTorch Variable
         :param x: PyTorch Variable
+        :param mask: PyTorch Variable for invalid pixels in disparity,
+         set to None by default.
         :return: PyTorch Variable
         """
         w = self.weights.forward(img0)

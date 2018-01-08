@@ -31,8 +31,10 @@ def read_disparity(img_path):
     image_2d = numpy.vstack(itertools.imap(numpy.uint16, pngdata))
     im2 = image_2d.astype(float)
     im2 /= 255.
-    im2[im2==0.] = -1.
-    return Image.fromarray(im2).convert("L")
+    mask = numpy.ones(im2.shape, dtype=numpy.float)
+    mask[im2 == 0.] = 0.
+    return Image.fromarray(im2).convert("L"), \
+           Image.fromarray(mask).convert("L")
 
 
 def indexer_KITTI(root, train=True):
@@ -42,7 +44,7 @@ def indexer_KITTI(root, train=True):
     :param train:
     :return:
     """
-    #TODO(louise): add training / testing configuration
+    # TODO(louise): add training / testing configuration
     stereo_l = os.path.join(root, 'image_0')
     stereo_r = os.path.join(root, 'image_1')
     disparity = os.path.join(root, 'disp_noc')
@@ -51,7 +53,6 @@ def indexer_KITTI(root, train=True):
     for l, r, d in itertools.izip(sorted(os.listdir(stereo_l)),
                                   sorted(os.listdir(stereo_r)),
                                   sorted(os.listdir(disparity))):
-
         img_l = os.path.abspath(os.path.join(stereo_l, l))
         img_r = os.path.abspath(os.path.join(stereo_r, r))
         disp = os.path.abspath(os.path.join(disparity, d))
@@ -81,17 +82,19 @@ class KITTI(Dataset):
         # Read each image
         left_img = Image.open(left_path).convert("L")
         right_img = Image.open(right_path).convert("L")
-        disp = read_disparity(disp_path)
+        disp, mask = read_disparity(disp_path)
         # Apply transforms to the images
         if self.transform is not None:
             left_img = self.transform(left_img)
             right_img = self.transform(right_img)
         if self.depth_transform is not None:
             disp = self.depth_transform(disp)
+            mask = self.depth_transform(mask)
         disp = transforms.ToTensor()(disp)
+        mask = transforms.ToTensor()(mask)
 
         # Return 3-tuple
-        return left_img, right_img, disp
+        return left_img, right_img, disp, mask
 
     def __len__(self):
         return len(self.imgs)

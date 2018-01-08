@@ -1,6 +1,5 @@
 import unittest
 from src.mrf import MRF
-from src.energy import Energy
 from src.scorer import Scorer
 from src.unaries import Unary
 from src.pairwise import Pairwise

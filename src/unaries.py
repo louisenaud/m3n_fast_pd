@@ -13,7 +13,6 @@ Created by: louise
 #   - scorer: img_0_patch and img_1_patch --> img_score: B x 1 x H x W or B x H x W
 
 
-
 import torch
 import torch.nn as nn
 from patch_extractor import PatchExtractor
@@ -37,17 +36,18 @@ class Unary(nn.Module):
     def parameters_constraint(self):
         """
         Apply constraint on parameters
+        :return
         """
-
         self.score.parameters_constraint()
 
     def forward(self, img0, img1, x, mask=None):
         """
         Computes unary terms for grid.
-        :param img0:
-        :param img1:
-        :param x:
-        :return:
+        :param img0: Pytorch Variable [BxCxHxW]
+        :param img1: Pytorch Variable [BxCxHxW]
+        :param x: Pytorch Variable [BxHxW]
+        :param mask: Pytorch Variable [BxHxW]
+        :return: Pytorch Variable [BxHxW]
         """
         # Create patches from img0 and img1
         img0_patch = self.patch_extractor.forward(img0)

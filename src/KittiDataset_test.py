@@ -6,11 +6,7 @@ On:         02/01/18
 At:         5:53 PM
 """
 
-import torch
-from torch.autograd import Variable
-
 from torch.utils.data import DataLoader
-from torch.utils.data.sampler import RandomSampler
 from torchvision import transforms
 
 from src.KittiDataset import KITTI, indexer_KITTI

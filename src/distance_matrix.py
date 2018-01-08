@@ -36,6 +36,7 @@ class Distance(nn.Module):
     def parameters_constraint(self):
         """
         Apply box constraint on parameters
+        :return
         """
 
         self.alpha.data.clamp(0., 1000.)
@@ -53,6 +54,8 @@ class Distance(nn.Module):
     def create_distance_matrix(self, L):
         """
         Compute the weights from image
+        :param L: int, range of disparity.
+        :return: Pytorch Variable [1xLxL]
         """
         indices = Variable(torch.arange(start=0, end=L, step=1))
         dist = Variable(torch.FloatTensor(1, int(L), int(L))).zero_()

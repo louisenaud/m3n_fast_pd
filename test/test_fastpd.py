@@ -1,7 +1,5 @@
 import unittest
-from src.fast_pd import PyFastPd
-import torch
-from torch.autograd import Variable
+from src.fast_pd.fast_pd import PyFastPd
 
 import numpy as np
 

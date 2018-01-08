@@ -1,5 +1,5 @@
-
 import matplotlib
+
 matplotlib.use('tkAgg')
 
 import matplotlib.pyplot as plt
@@ -19,7 +19,6 @@ img0_path = '../data/test/tsukuba1.png'
 img0 = plt.imread(img0_path)
 img0 = img0.astype(dtype=np.float32)
 
-
 # Convert to pytorch format
 img0 = Variable(utils.img_to_torch(img0))
 
@@ -34,4 +33,3 @@ plt.show()
 
 plt.imshow(w[0, :, :, 1])
 plt.show()
-

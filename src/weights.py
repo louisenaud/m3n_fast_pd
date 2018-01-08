@@ -6,6 +6,7 @@ Created by: louise
 import torch
 import torch.nn as nn
 
+
 class Weights(nn.Module):
     """
     Compute the regularization weights from an image:
@@ -39,6 +40,7 @@ class Weights(nn.Module):
     def parameters_constraint(self):
         """
         Apply box constraint on parameters
+        :return
         """
 
         self.lambda_cst.data.clamp(0., 1000.)
@@ -49,19 +51,18 @@ class Weights(nn.Module):
     def forward(self, img, type=torch.DoubleTensor):
         """
         Compute the weights from image.
-        :param img: Pytorch Variable [BxCxWxH]
+        :param img: Pytorch Variable [BxCxHxW]
         :return:Pytorch Variable
         """
         ttt = self.conv_3x3.forward(img)
-        img_map = ttt**2.
-        #img_map = torch.pow(ttt, self.alpha)
+        img_map = ttt ** 2.
+        # img_map = torch.pow(ttt, self.alpha)
         img_map = img_map.permute(0, 2, 3, 1)
         w_adapt = torch.exp(- self.inv_sigma.type_as(img) * img_map)
 
         return self.lambda_cst.type_as(img) + self.lambda_apt.type_as(img) * \
-                                                          w_adapt
+                                              w_adapt
 
 
 if __name__ == '__main__':
-
     raise NotImplementedError()

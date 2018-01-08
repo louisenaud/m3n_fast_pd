@@ -31,9 +31,9 @@ class PatchExtractor(nn.Module):
     def forward(self, img, x=None):
         """
         Extract patches of size patch_shape.
-        :param img:
-        :param x:
-        :return:
+        :param img: Pytorch Variable [BxCxHxW]
+        :param x: Pytorch Variable [BxHxW]
+        :return: Pytorch Variable [BxCxHxWx Hpatch x Wpatch]
         """
         # Get size
         B, C, H, W = img.size()

@@ -16,6 +16,11 @@ import torch.nn as nn
 class Energy(nn.Module):
 
     def __init__(self, unary, pairwise):
+        """
+        Constructor of Energy class.
+        :param unary: Unary object
+        :param pairwise: Pairwise object
+        """
         super(Energy, self).__init__()
 
         self.unary = unary
@@ -23,7 +28,8 @@ class Energy(nn.Module):
 
     def parameters_constraint(self):
         """
-        Apply constraint on parameters
+        Apply constraint on parameters.
+        :return:
         """
 
         self.unary.parameters_constraint()
@@ -31,11 +37,12 @@ class Energy(nn.Module):
 
     def forward(self, img0, img1, x, mask=None):
         """
-
-        :param img0:
-        :param img1:
-        :param x:
-        :return:
+        Computes energy for pair of images img0, img1.
+        :param mask:
+        :param img0: Pytorch Variable [BxCXHxW]
+        :param img1: Pytorch Variable [BxCXHxW]
+        :param x: Pytorch Variable [BxCXHxW]
+        :return: Pytorch Variable [B]
         """
         unary = self.unary.forward(img0, img1, x, mask)
         unary_cost = torch.sum(torch.sum(unary, dim=2), dim=1)

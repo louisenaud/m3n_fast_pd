@@ -12,8 +12,6 @@ Created by: louise
 
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
-from interpolator import Interpolator
 
 
 class Scorer(nn.Module):
@@ -23,8 +21,7 @@ class Scorer(nn.Module):
         score: B x H x W
     """
 
-    def __init__(self, parameters=None, num_input_channel=
-    1):
+    def __init__(self, parameters=None, num_input_channel=1):
         super(Scorer, self).__init__()
 
         if not parameters:
@@ -37,6 +34,7 @@ class Scorer(nn.Module):
     def parameters_constraint(self):
         """
         Apply box constraint on parameters
+        :return
         """
 
         self.alpha.data.clamp(0., 1000.)

@@ -1,5 +1,5 @@
-
 import matplotlib
+
 matplotlib.use('tkAgg')
 
 import matplotlib.pyplot as plt
@@ -23,9 +23,8 @@ img0 = img0.astype(dtype=np.float32)
 img1 = plt.imread(img1_path)
 img1 = img1.astype(dtype=np.float32)
 
-
-#plt.imshow(img0)
-#plt.show()
+# plt.imshow(img0)
+# plt.show()
 
 # Convert to pytorch format
 img0 = utils.img_to_torch(img0)
@@ -49,4 +48,3 @@ imgw = utils.img_to_numpy(imgw.data)
 
 plt.imshow(score)
 plt.show()
-

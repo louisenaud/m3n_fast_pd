@@ -13,15 +13,27 @@ import torch.nn as nn
 import numpy as np
 from fast_pd.fast_pd import PyFastPd
 
+
 class MRF(nn.Module):
     def __init__(self, unary, pairwise):
+        """
+
+        :param unary:
+        :param pairwise:
+        """
         super(MRF, self).__init__()
 
         self.unary = unary
         self.pairwise = pairwise
 
     def get_pairwise_costs(self, img0, x_min, x_max):
+        """
 
+        :param img0:
+        :param x_min:
+        :param x_max:
+        :return:
+        """
         L = x_max - x_min + 1
 
         # Compute pairwise term
@@ -34,7 +46,15 @@ class MRF(nn.Module):
         return w, dist_mat
 
     def get_unary_cost(self, img0_patch, img1, x_disp, x_gt=None, margin=None):
+        """
 
+        :param img0_patch:
+        :param img1:
+        :param x_disp:
+        :param x_gt:
+        :param margin:
+        :return:
+        """
         # Extract patch form img1 for current x
         img1_patch = self.unary.patch_extractor.forward(img1, x_disp)
 
@@ -51,7 +71,16 @@ class MRF(nn.Module):
         return unary_cost
 
     def get_unary_costs(self, img0, img1, x_min, x_max, x_gt=None, margin=None):
-
+        """
+        Computes unary costs for each image pair in the batch.
+        :param img0: Pytorch Variable [BxCxHxW]
+        :param img1: Pytorch Variable [BxCxHxW]
+        :param x_min: Pytorch Variable [BxHxW]
+        :param x_max: Pytorch Variable [BxHxW]
+        :param x_gt: Pytorch Variable [BxHxW]
+        :param margin: Margin
+        :return: numpy array [BxHxW]
+        """
         B, C, H, W = img0.size()
 
         L = x_max - x_min + 1
@@ -68,7 +97,13 @@ class MRF(nn.Module):
         return unary_cost.cpu().numpy()
 
     def fast_pd_map(self, unary_cost, w, dist_mat):
-        """ Computes the MAP of an pairwise MRF"""
+        """
+        Computes the MAP of a pairwise MRF.
+        :param unary_cost: numpy array
+        :param w: numpy array
+        :param dist_mat: numpy array
+        :return: numpy array
+        """
 
         fast_pd_type = np.float32
 
@@ -90,7 +125,13 @@ class MRF(nn.Module):
         return x_sol
 
     def map_inference(self, unary_cost, w, dist_mat):
-
+        """
+        Wrapper for C++ MAP inference FastPD.
+        :param unary_cost: numpy array [BxHxWxL].
+        :param w: numpy array [BxHxW].
+        :param dist_mat: numpy array [BxHxW].
+        :return: numpy array [BxHxW].
+        """
         B, H, W, L = unary_cost.shape
         x_min = np.zeros((B, H, W))
 
@@ -101,7 +142,16 @@ class MRF(nn.Module):
         return x_min
 
     def forward(self, img0, img1, x_min, x_max, x_opt=None, margin=None):
-
+        """
+        Computes the optimal label for each pixel.
+        :param img0: Pytorch Variable [BxCxHxW]
+        :param img1: Pytorch Variable [BxCxHxW]
+        :param x_min: Pytorch Variable [1]
+        :param x_max: Pytorch Variable [1]
+        :param x_opt: numpy array [BxHxW]
+        :param margin:
+        :return: numpy array
+        """
         # Pairwise costs
         w, dist_mat = self.get_pairwise_costs(img0, x_min, x_max)
 
