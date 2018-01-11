@@ -12,7 +12,6 @@ import os.path
 
 from torch.utils.data.dataset import Dataset
 from torchvision import transforms
-import torch
 import numpy
 
 import png

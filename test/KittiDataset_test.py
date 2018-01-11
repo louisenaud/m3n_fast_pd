@@ -9,8 +9,7 @@ At:         5:53 PM
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-from src.KittiDataset import KITTI, indexer_KITTI
-
+from src.datasets.KittiDataset import KITTI, indexer_KITTI
 
 # Transform dataset
 patch_size = 200
