@@ -1,11 +1,10 @@
 """
 Project:    m3n_fast_pd
-File:       middlebury_dataset.py
+File:       middlebury_2001_dataset.py
 Created by: louise
-On:         10/01/18
-At:         3:48 PM
+On:         11/01/18
+At:         2:13 PM
 """
-
 from __future__ import print_function
 import os
 import os.path
@@ -16,6 +15,34 @@ from torchvision import transforms
 import numpy as np
 
 from PIL import Image
+
+
+def load_pgm(filename, byteorder='>'):
+    """
+    Source mainly from: https://stackoverflow.com/questions/7368739/numpy-and-16-bit-pgm
+    Return image data from a raw PGM file as numpy array.
+
+    Format specification: http://netpbm.sourceforge.net/doc/pgm.html
+
+    """
+    with open(filename, 'rb') as f:
+        buffer_im = f.read()
+    try:
+        header, width, height, maxval = re.search(
+            b"(^P5\s(?:\s*#.*[\r\n])*"
+            b"(\d+)\s(?:\s*#.*[\r\n])*"
+            b"(\d+)\s(?:\s*#.*[\r\n])*"
+            b"(\d+)\s(?:\s*#.*[\r\n]\s)*)", buffer_im).groups()
+    except AttributeError:
+        raise ValueError("Does not recognize PGM file: '%s'" % filename)
+    disp = np.frombuffer(buffer_im, dtype='u1' if int(maxval) < 256 else byteorder+'u2',
+                         count=int(width)*int(height),
+                         offset=len(header)).reshape((int(height), int(width)))
+    disp /= 8.
+    mask = np.ones(disp.shape, dtype=float)
+    mask[disp == 0.] = 0.
+    return Image.fromarray(disp).convert("L").transpose(Image.FLIP_TOP_BOTTOM), \
+           Image.fromarray(mask).convert("L").transpose(Image.FLIP_TOP_BOTTOM)
 
 
 def load_pfm(fn):
@@ -61,34 +88,26 @@ def load_pfm(fn):
            Image.fromarray(mask).convert("L").transpose(Image.FLIP_TOP_BOTTOM)
 
 
-def indexer_middlebury(root, train=True):
+def indexer_middlebury_2001(root, train=True):
     """
 
     :param root:
     :param train:
     :return:
     """
-    items = os.listdir("/media/louise/data/datasets/middlebury/")
-
-    newlist = []
-    for names in items:
-        if names.endswith("-perfect"):
-            newlist.append(names)
-    print(newlist)  # perfect folders
-    #newlist = newlist.sort()
+    basenames = ['barn1', 'barn2', 'bull', 'poster', 'sawtooh', 'tsukuba', 'venus']
     images = []
-    # Get disp 0, disp 1, im0, im1
-    for folder in newlist:
-        print(os.path.join(root, folder, "im0.png"))
-        im0 = Image.open(os.path.join(root, folder, "im0.png")).convert("L")
-        im1 = Image.open(os.path.join(root, folder, "im1.png")).convert("L")
-        disp, mask = load_pfm(os.path.join(root, folder, "disp0.pfm"))
-
+    for basename in basenames:
+        print(os.path.join(root, basename + "1.ppm"))
+        im0 = Image.open(os.path.join(root, basename + "1.ppm")).convert("L")
+        im1 = Image.open(os.path.join(root, basename + "2.ppm")).convert("L")
+        disp, mask = load_pgm(os.path.join(root, basename + "GT.pgm"))
         images.append((im0, im1, disp, mask))
+
     return images
 
 
-class Middlebury(Dataset):
+class Middlebury2001(Dataset):
     def __init__(self, root, indexer, transform=None, depth_transform=None):
         images = indexer(root)
         if len(images) == 0:
@@ -101,7 +120,7 @@ class Middlebury(Dataset):
         """
         __getitem__ overloading.
         :param index: int
-        :return: 3-tuple of images.
+        :return: 4-tuple of images.
         """
         # Read each image
         left_img = self.imgs[index][0]
